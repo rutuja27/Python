@@ -8,45 +8,62 @@ Created on Wed Sep  2 12:51:32 2020
 
 import csv
 import numpy as np
+import matplotlib
+#matplotlib.use('Tkagg')
+#matplotlib.interactive(True)
 import matplotlib.pyplot as plt
+
  
-inter_latency = 1;
-plot_file1 = open('C:/build-Release/Release/imagegrab_0.csv', 'r')
-plot_file2 = open('C:/build-Release/Release/imagedispatch_0.csv', 'r')
-#plot_file3 = open('C:/Users/patilr/BIAS/misc/grasshopper/csv_data/imagegrab_grasshopper_mono8.csv','r')
-#plot_file2 = open('C:/Users/patilr/BIAS/test_code/bin64/vs2015/delay.csv', 'r')
+def readcsvFile(filename, arr):
+    data_grab = csv.reader(filename, delimiter=',')
+    for idx,row in enumerate(data_grab):
+        arr[idx] = np.float(row[1])/1000
+        
 
-image_plot1 = csv.reader(plot_file1, delimiter=',')
-image_plot2 = csv.reader(plot_file2, delimiter=',')
-#image_plot3 = csv.reader(plot_file3, delimiter=',')
+def plot_data(arr, inter_latency):
+    
+    sz = arr.size;
+    if inter_latency:
+        lat_val=np.diff(arr)
+        plt.plot(lat_val[0:sz-2],'.')
+    else:
+        plt.plot(arr[0:],'.')
+   
 
-line_count = 0
-image_ts1 = np.array([0],dtype = np.int64)
-image_ts2 = np.array([0],dtype = np.int64)
-#image_ts3 = np.array([0],dtype = np.int64)
-output = np.array([],dtype=np.ulonglong)
+def main():
 
-for im1,im2  in zip(image_plot1,image_plot2):
-    image_ts1 = np.append(image_ts1, np.int64(im1[1]))
-    image_ts2 = np.append(image_ts2, np.int64(im2[1]))
-#    image_ts3 = np.append(image_ts3, np.int64(im3[1]))
-    line_count += 1
+    inter_latency = 1;
+    no_of_frames = 100000
+    
+    dir_list =['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/two_camera/10_12_2020/']
+               #'C:/Users/27rut/BIAS/misc/imagegrab_day_trials/7_12_2020/',
+               #'C:/Users/27rut/BIAS/misc/imagegrab_day_trials/6_12_2020/']
+    lat_val = np.zeros((no_of_frames),dtype = np.float)
 
-if inter_latency:
-    diff = [j-i for i, j in zip(image_ts2[:-1], image_ts2[1:])]
-    diff = np.array(diff)
 
-print(image_ts1.size)
-#plt.plot(image_ts1[10:50000])
-#plt.plot(image_ts3[7100:7200],'.')
-plt.plot(image_ts1)
-plt.plot(diff[1:])
-#plt.plot(image_ts3)
-plt.xlabel('Frames')
-plt.ylabel('MicroSeconds')
-plt.title('Image Grab Latency')
-plt.show()
+    fig = plt.figure();
 
-plot_file1.close
-plot_file2.close
-#plot_file3.close
+    for frame_dir in dir_list:
+     
+       for i in range(1,4):
+            
+           lat_val.fill(0.0)
+           try:
+               file_handle = open(frame_dir + 'signal_slot_f2f1_trial'+ str(i)  + '.csv', 'r+');
+           except IOError:
+               print (' File could not be open. Check file location',i)
+               return -1;
+          
+           readcsvFile(file_handle, lat_val)
+           plot_data(lat_val, inter_latency)
+    file_handle.close 
+    plt.plot(5*np.ones((no_of_frames)))
+    plt.xlabel('Frames')
+    plt.ylabel('Milliseconds')
+    plt.title('ImageGrab f2f Latency')
+    plt.show()     
+    #fig.savefig('C:/Users/27rut/BIAS/misc/signal_slot_day_trials/figs/imagegrab_f2f_latencies.pdf')
+
+
+if __name__ == "__main__":
+    main()
