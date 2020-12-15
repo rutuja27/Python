@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+lust# -*- coding: utf-8 -*-
 """
 Created on Mon Nov  9 14:51:36 2020
 
@@ -28,6 +28,13 @@ def readcsvFile(filename, arr,spike_threshold, inter_latency):
               prev =   (np.float(row[1])/1000)  
             
     #print(arr)
+
+def getMaxCam(cdf_list, arr, no_cam):
+    
+    for i in range(0, no_cam):
+        
+    
+
 
 def plot_histogram(hist_list, bins, binsize, bin_shft,  norm_factor, 
                    min_spike_threshold, max_spike_threshold,plt_handle, plt_handle1):
@@ -63,8 +70,9 @@ def main():
     ## read csv files
     dir_list = ['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/single_camera/'];
     days = ['6_12_2020/', '7_12_2020/', '8_12_2020/']
+    cam = ['0','1']
     cdf_hist_list = [];
-    dir_len = len(days)
+    dir_len = len(cam) #len(days)
     
      ## experiment variables
     inter_latency=1;
@@ -79,19 +87,25 @@ def main():
     print(norm_factor)
     
     for frame_dir in dir_list:
-        #data_arr=[]
-        for day in days:
-           data_arr=[] 
-           for i in range(3,5):
-                
-                try:
-                    file_handle = open(frame_dir + day + 'signal_slot_f2f_trial'+ str(i)  + '.csv', 'r+');
-                except IOError:
-                    print (' File could not be open. Check file location')
-                    return -1;
-                readcsvFile(file_handle, data_arr, min_spike_threshold,inter_latency);            
-           cdf_hist_list.append(data_arr)    
+        data_arr=[]
+        for cam in cam:
             
+            for day in days:
+                #data_arr=[] 
+                for i in range(1,6):
+                
+                    try:
+                        file_handle = open(frame_dir + day + 'signal_slot_f2f' + cam + '_trial' + str(i)  + '.csv', 'r+');
+                    except IOError:
+                        print (' File could not be open. Check file location')
+                        return -1;
+                    readcsvFile(file_handle, data_arr, min_spike_threshold,inter_latency);            
+        cdf_hist_list.append(data_arr)    
+            
+    
+    #plot max of two cameras 
+    max_lat =np.array( no_of_trials, 0,dtype=np.float)
+    getMaxCam(cdf_hist_list, max_lat, len(cam))
     
     ## plot hists and cdf
     fig, axes = plt.subplots(nrows=2, ncols=1)
@@ -115,14 +129,14 @@ def main():
   
     #binsize
     if( step_size <=  dir_len):
-        binsize = step_size/(len(days)+1);
+        binsize = step_size/(dir_len+1);
     else:
         binsize =1.0;
         
     print(binsize)    
         
     #get histograms and cdf    
-    for i in range(0,len(days)):
+    for i in range(0,dir_len):
         bin_shft = bin_shift[i]*(binsize)
         plot_histogram(cdf_hist_list[i] , bins, binsize, bin_shft, norm_factor,
                           min_spike_threshold, max_spike_threshold, ax0, ax1)
@@ -145,7 +159,7 @@ def main():
     ax1.set_ylabel('spikes/secs',fontsize=8)
     ax1.set_xlabel('Latency of Spikes',fontsize=8)
     
-    labels = ['Day 1' , 'Day 2', 'Day 3']
+    labels = ['Cam 1' , 'Cam 2', 'Max']
     ax0.legend(labels, fontsize=7)
     
     #fig.savefig('C:/Users/27rut/BIAS/misc/signal_slot_day_trials/distribution_of_latencies_across_days(2 trials).png')
