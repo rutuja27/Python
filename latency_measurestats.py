@@ -12,10 +12,10 @@ import numpy as np
 def readcsvFile(filename, arr):
     data_grab = csv.reader(filename, delimiter=',')
     for idx,row in enumerate(data_grab):
-        arr.append(np.int64(row[1]))        
+        arr.append(np.float(row[1]))        
 
 def get_peaks(arr):
-    return arr > 3000
+    return arr > 5000
    
     
 def bins_labels(bins, **kwargs):
@@ -26,9 +26,9 @@ def bins_labels(bins, **kwargs):
 def main():
     
     ##imagegrab_file = open('C:/build-Release/Release/imagegrab_0.csv', 'r')
-    imagegrab_file = open('C:/Users/patilr/BIAS/misc/spike_plots/plot_data/01_09_2020/signal_slot_cam1_50000.csv','r')
+    imagegrab_file = open('C:/Users/27rut/BIAS/build/Release/imagegrab_f2flatency0.csv','r')
     len_of_frames = 49999
-    num_of_trials = 5;
+    num_of_trials = 1;
     
     latency = []   
     
@@ -86,16 +86,16 @@ def main():
     #bin_labels(10)
     ax0.set_title('histogram of spacing of peaks from each other',fontsize=10)
     ax0.set_xticks(bins[:-1])
-    ax0.set_ylim([0,1*1e4])
+    ax0.set_ylim([1,1*1e4])
 
     
     #histogram of magnitude of peaks 
     counts2, bins2, patches2 = ax1.hist(latency[peaks], bins=peak_mag ,color='#0504aa',alpha=0.7, rwidth=0.85, align = 'left', log=True)
     ax1.set_title('histogram of magnitude of peaks',fontsize=10)
     ax1.set_xticks(peak_mag[:-1])
-    ax1.set_ylim([0,1*1e4])
+    ax1.set_ylim([1,1*1e4])
 
-    fig.suptitle("SignalSlot Three Thread")
+    fig.suptitle("Image Grab + Image Dispatch + Signal Slot Thread")
     plt.show()
     
 if __name__ == "__main__":

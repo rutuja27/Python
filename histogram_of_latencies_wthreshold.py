@@ -13,19 +13,19 @@ import numpy as np
 def readcsvFile(filename, arr):
     data_grab = csv.reader(filename, delimiter=',')
     for idx,row in enumerate(data_grab):
-        arr.append(np.int64(row[1]))   
+        arr.append(np.float(row[1]))   
 
 def get_peaks(arr):
-    return arr > 3000
+    return arr > 5000
 
 
 def main():
 
 
-    imagegrab_file = open('C:/Users/patilr/BIAS/misc/spike_plots/plot_data/imagegrab_50000.csv','r')
-    imagedispatch_file = open('C:/Users/patilr/BIAS/misc/spike_plots/plot_data/imagedispatch_cam1_50000.csv','r') 
-    signal_slot_file = open('C:/Users/patilr/BIAS/misc/spike_plots/plot_data/ig_id_sl_cam1_50000.csv','r') 
-    len_of_frames = 50000;
+    imagegrab_file = open('C:/Users/27rut/BIAS/misc/old_windows_machine_data/single_camera_trig/spinImage_time_trial3.csv','r')
+    imagedispatch_file = open('C:/Users/27rut/BIAS/misc/old_windows_machine_data/single_camera_trig/spinImage_time_trial4.csv','r') 
+    signal_slot_file = open('C:/Users/27rut/BIAS/misc/old_windows_machine_data/single_camera_trig/spinImage_time_trial5.csv','r') 
+    len_of_frames = 199999;
     num_of_trials = 1;
     
     latency_ig = []
@@ -35,18 +35,18 @@ def main():
     #read for one thread
 
     readcsvFile(imagegrab_file, latency_ig)
-    latency_ig = np.array(latency_ig,dtype = np.int64)
+    latency_ig = np.array(latency_ig,dtype = np.float)
     latency_ig = np.reshape(latency_ig,(( num_of_trials, len_of_frames)))
     print(latency_ig)
     
     #read for 2 threads
     readcsvFile(imagedispatch_file, latency_id)
-    latency_id = np.array(latency_id,dtype = np.int64)
+    latency_id = np.array(latency_id,dtype = np.float)
     latency_id = np.reshape(latency_id,(( num_of_trials, len_of_frames)))
     
     # read for 3 threads
     readcsvFile(signal_slot_file, latency_sl)
-    latency_sl = np.array(latency_sl,dtype = np.int64)
+    latency_sl = np.array(latency_sl,dtype = np.float)
     latency_sl = np.reshape(latency_sl,(( num_of_trials, len_of_frames)))
     
     #get peaks and non peaks
@@ -79,8 +79,8 @@ def main():
 
     fig, ax = plt.subplots()
     rects1 = ax.bar(x - width/2, thread1, 0.10, label='1 thread', log=True)
-    rects2 = ax.bar(x, thread2, 0.10, label='2 threads', log=True)
-    rects3= ax.bar(x + width/2, thread3, 0.10, label='3 threads', log=True)
+    #rects2 = ax.bar(x, thread2, 0.10, label='2 threads', log=True)
+    #rects3= ax.bar(x + width/2, thread3, 0.10, label='3 threads', log=True)
     
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Counts')
@@ -88,7 +88,7 @@ def main():
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
-    fig.savefig('C:/Users/patilr/BIAS/misc/cvml/histogram_of_latencies.svg')
+    #fig.savefig('C:/Users/patilr/BIAS/misc/cvml/histogram_of_latencies.svg')
     
     fig.tight_layout()
 
