@@ -10,6 +10,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 
+    
+def readConfigFile(filename, config):
+    
+    with open(filename, 'r', newline='') as f:
+        config_reader = csv.reader(f , delimiter=',')
+        rows = [[col for col in row ] for row in config_reader]
+
+        keys = config.keys()
+        for idx,row in enumerate(rows):   
+            for idy,col in enumerate(row):
+                if(idy == 0):
+                    if(row[idy] == keys[idx]):
+                        config[keys[idx]].append(col)
+            
+        #print(config.vals)     
+
 
 
 def readcsvFile(filename, arr, max_arr, spike_threshold, inter_latency):
@@ -72,8 +88,30 @@ def main():
     
     
     ## read csv files
+    Config = {
+        
+        'dir_list' : [],
+        'days' : [],
+        'file_names' : [],
+        'cam' : {},
+        'dir_len' : 0,
+        'inter_latency' : 0,
+        'min_spike_threshold' : 0,
+        'max_spike_threshold' : 0,
+        'step_size' : 0,
+        'no_of_frames' : 0,
+        'no_of_trials': 0,
+        'framerate' : 0 ,
+        'no_of_days':0,
+        'no_of_cam' : 0,
+            
+    }
+    
+    filename = 'C:/Users/patilr/BIAS/scripts/python/signalslot_vs_jaaba_twocamera.csv'    
+    readConfigFile(filename,Config)    
+    
     #'C:/Users/27rut/BIAS/misc/imagegrab_day_trials/two_camera/', 
-    dir_list = ['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/two_camera/', 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/two_camera/'];
+    '''dir_list = ['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/two_camera/', 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/two_camera/'];
     days = ['21_12_2020/', '22_12_2020/', '23_12_2020/']
     file_names = ['signal_slot_f2f', 'jaaba_f2f']
     cam = ['0','1']
@@ -190,7 +228,7 @@ def main():
     ax1.set_xlabel('Latency of Spikes',fontsize=8)
     
     labels = ['Signal Slot Cam0', 'Signal Slot Cam1', 'Max']
-    ax0.legend(labels, fontsize=7)
+    ax0.legend(labels, fontsize=7)'''
     
     #fig.savefig('C:/Users/27rut/BIAS/misc/signal_slot_day_trials/comp_imagegrabw&woplugin_twocameras.png')
                 
