@@ -14,17 +14,31 @@ from scipy import stats
 def readConfigFile(filename, config):
     
     with open(filename, 'r', newline='') as f:
+        
         config_reader = csv.reader(f , delimiter=',')
         rows = [[col for col in row ] for row in config_reader]
 
-        keys = config.keys()
+        keys = list(config.keys())
         for idx,row in enumerate(rows):   
             for idy,col in enumerate(row):
+                #print(row[idy])
                 if(idy == 0):
-                    if(row[idy] == keys[idx]):
-                        config[keys[idx]].append(col)
-            
-        #print(config.vals)     
+                    
+                    if row[idy] == keys[idx]:
+                        continue
+                    else:
+                        break
+                    
+                if type(config[keys[idx]]) is list:
+                    print(col)
+                    config[keys[idx]].append(col)
+                elif type(config[keys[idx]]) is float:
+                    config[keys[idx]] =  int(float(col))
+                elif type(config[keys[idx]]) is int:
+                    config[keys[idx]] = int(col)
+                else:
+                    continue;
+                   
 
 
 
@@ -81,7 +95,7 @@ def plot_cdf(hist_list, bins, norm_factor, min_spike_threshold, max_spike_thresh
                          defaultreallimits=(min_spike_threshold, max_spike_threshold))
     total_count = res1.cumcount[-1]
     cum_count = total_count - res1.cumcount
-    plt_handle.plot(bin_edges, cum_count*norm_factor) 
+    plt_handle.plot(bins, cum_count*norm_factor) 
     
 
 def main():
@@ -93,7 +107,7 @@ def main():
         'dir_list' : [],
         'days' : [],
         'file_names' : [],
-        'cam' : {},
+        'cam' : [],
         'dir_len' : 0,
         'inter_latency' : 0,
         'min_spike_threshold' : 0,
@@ -107,28 +121,28 @@ def main():
             
     }
     
-    filename = 'C:/Users/patilr/BIAS/scripts/python/signalslot_vs_jaaba_twocamera.csv'    
+    filename = 'C:/Users/27rut/BIAS/scripts/python/config_files/signalslot_vs_jaaba_twocamera.csv'    
     readConfigFile(filename,Config)    
     
     #'C:/Users/27rut/BIAS/misc/imagegrab_day_trials/two_camera/', 
-    '''dir_list = ['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/two_camera/', 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/two_camera/'];
-    days = ['21_12_2020/', '22_12_2020/', '23_12_2020/']
-    file_names = ['signal_slot_f2f', 'jaaba_f2f']
-    cam = ['0','1']
+    dir_list = Config['dir_list'];
+    days = Config['days']
+    file_names = Config['file_names']
+    cam = Config['cam']
     cdf_hist_list = [];
     max_camera_hist_list = []
     dir_len = len(dir_list)
     
      ## experiment variables
-    inter_latency=1;
-    min_spike_threshold = 5;
-    max_spike_threshold = 30;
-    step_size = 2.0;
-    no_of_frames = 100000
-    no_of_trials = 5
-    framerate = 500
-    no_of_days = len(days)
-    no_of_cam = 1 #len(cam)
+    inter_latency= Config['inter_latency']
+    min_spike_threshold = Config['min_spike_threshold']
+    max_spike_threshold = Config['max_spike_threshold']
+    step_size = Config['step_size']
+    no_of_frames = Config['no_of_frames']
+    no_of_trials = Config['no_of_trials']
+    framerate = Config['framerate']
+    no_of_days = Config['no_of_days']
+    no_of_cam = Config['no_of_cam']
     norm_factor= float(framerate/(no_of_frames*no_of_trials*no_of_days))
     print("Norm factor: " , norm_factor)
     
@@ -227,10 +241,10 @@ def main():
     ax1.set_ylabel('spikes/secs',fontsize=8)
     ax1.set_xlabel('Latency of Spikes',fontsize=8)
     
-    labels = ['Signal Slot Cam0', 'Signal Slot Cam1', 'Max']
-    ax0.legend(labels, fontsize=7)'''
+    labels = ['Signal Slot', 'JAABA']
+    ax0.legend(labels, fontsize=7)
     
-    #fig.savefig('C:/Users/27rut/BIAS/misc/signal_slot_day_trials/comp_imagegrabw&woplugin_twocameras.png')
+    fig.savefig('C:/Users/27rut/BIAS/misc/signal_slot_day_trials/comp_signal_slotVsjaaba_twocameras.pdf')
                 
                 
     
