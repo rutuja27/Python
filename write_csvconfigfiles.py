@@ -58,18 +58,19 @@ def main():
         'numCameras': 2,
         'cam_suffix': [0,1], 
         'dir_len': 1,
-        'dir_list': ['C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/'],
-        'numFrames':100000,
-        'no_of_trials': 5,
-        'framerate': 300,
+        'dir_list': ['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/plugin_latency'],
+        'numFrames':10000,
+        'no_of_trials': 1,
+        'framerate': 400,
         'latency_threshold' : 6.0,
         'cam_dir' : 'multi',
+        'detectSpike': '0',
         'nidaq_prefix': 'nidaq',
-        'f2f_prefix': 'f2f',
-        'queue_prefix': 'queue',
-        'plugin_prefix': 'jaaba_plugin',
+        'f2f_prefix': '',
+        'queue_prefix': '',
+        'plugin_prefix': 'signal_slot',
         'logging_prefix': '',
-        'framegrab_prefix': '',
+        'framegrab_prefix': 'imagegrab',
         'git_commit': '',
         'date':'',
         'count_latencyspikes_nidaq':[],
@@ -90,8 +91,8 @@ def main():
     }
        
      ## read csv files
-    filename = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/' + \
-               'config_files/short/jaaba_plugin_multicamera_shorttrial_run_'         
+    filename = 'C:/Users/27rut/BIAS/misc/signal_slot_day_trials/' + \
+               'config_files/short/signal_slot_multicamera_shorttrial_run_'         
     Config['git_commit'] = str(ghs.get_sha()) 
     Config['date'] = str(ghs.get_current_date())
     Config['filename'] = filename + Config['git_commit'] + '_' + Config['date'] + '.csv'

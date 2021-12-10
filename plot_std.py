@@ -20,11 +20,11 @@ def set_plot_var():
      
      return fig, axes
  
-def plot_errorbar(Config, numCameras, filepath, fileList, alpha)    :
+def plot_errorbar(Config, numCameras, filepath, fileList, alpha):
     
     shape= ['+', '*', 'x', '.', '^', 'o']
     color = ['r', 'b','g', 'm', 'c', 'k']
-    fig, axes = set_plot_var()
+    
     
     for cam_id in range(0, numCameras):
     
@@ -35,15 +35,13 @@ def plot_errorbar(Config, numCameras, filepath, fileList, alpha)    :
         
             filename = filepath + fileList[i] + '.csv'      
             rcs.readConfigFile(filename, Config)         
-            mean_arr[i] = float(Config['mean_spikes_f2f'][cam_id]) * Config['framerate']
-            std_arr[i] = float(Config['std_spikes_f2f'][cam_id]) * Config['framerate']
+            mean_arr[i] = float(Config['mean_spikes_nidaq'][cam_id]) * Config['framerate']
+            std_arr[i] = float(Config['std_spikes_nidaq'][cam_id]) * Config['framerate']
         
         
         plt.errorbar(x=np.arange(0,len(fileList)),y=mean_arr, yerr=std_arr,  marker=shape[cam_id], color=color[cam_id],alpha=alpha)
 
-    plt.xticks(np.arange(0,len(fileList)))
-    axes.set_xticklabels(fileList)
-    plt.legend(['Short Trial', 'Long Trial']) 
+    
     
     
 def plot_queue(Config, filepath, fileList, alpha):
@@ -65,9 +63,6 @@ def plot_queue(Config, filepath, fileList, alpha):
         numCameras = Config['numCameras']
         numFrames = Config['numFrames']
         no_of_trials = Config['no_of_trials']
-        framerate  = Config['framerate'] 
-        latency_threshold = Config['latency_threshold']
-        cam_suffix = Config['cam_suffix']
         queue_prefix  = Config['queue_prefix']
         plugin_prefix = Config['plugin_prefix']
               
@@ -129,6 +124,7 @@ def main():
         'framerate': 0.0,
         'latency_threshold':0.0,
         'cam_dir': '',
+        'detectSpike': '0',
         'nidaq_prefix': '',
         'f2f_prefix': '',
         'queue_prefix': '',
@@ -190,17 +186,20 @@ def main():
 
             
     }
-    
+               
     dir_path = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/config_files/'
     configfile_prefix = 'jaaba_plugin'
     cam_dir = 'multi'
     trial_type = 'short'
     
+    flag_std = False
+    
     filepath = dir_path + trial_type + '/' +  configfile_prefix + '_' + cam_dir  + 'camera' + '_' + trial_type + 'trial_run_'
     
-    fileList = ['b8633_11_8_2021']
-    
-    #fileList = ['41e45_10_25_2021','f312d_10_24_2021' , 'f312d_10_22_2021', 'f312d_10_21_2021']
+    if flag_std:
+        fileList = ['41e45_10_25_2021','f312d_10_24_2021' , 'f312d_10_22_2021', 'f312d_10_21_2021']
+    else:
+        fileList = ['d2b00_11_19_2021']
     
     
     if cam_dir == 'multi' and configfile_prefix != 'jaaba_plugin':
@@ -208,24 +207,27 @@ def main():
     else:
         numCameras = 1
     
-    #plot_errorbar(Config_short, numCameras, filepath, fileList, 0.3)
     
-    plot_queue(Config_short, filepath, fileList, 0.5)
+    if flag_std:
+        fig, axes = set_plot_var()
+        plot_errorbar(Config_short, numCameras, filepath, fileList, 0.3)
+    else:
+        plot_queue(Config_short, filepath, fileList, 0.5)
     
-    trial_type = 'long'
+    # trial_type = 'long'
     
-    filepath = dir_path + trial_type + '/' +  configfile_prefix + '_' + cam_dir  + 'camera' + '_' + trial_type + 'trial_run_'
+    # filepath = dir_path + trial_type + '/' +  configfile_prefix + '_' + cam_dir  + 'camera' + '_' + trial_type + 'trial_run_'
     
-    #plot_errorbar(Config_long, numCameras, filepath, fileList, 1)
+    # plot_queue(Config_long, filepath, fileList, 1)
+    # if flag_std:
+    #     plot_errorbar(Config_long, numCameras, filepath, fileList, 1)
     
-    plot_queue(Config_long, filepath, fileList, 1)
-    
-
-    
-    
-    
-    #fig.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/errorplot_spikes_per_sec_f2f_trials_400fps_jaaba_day_trials.png')
-              
+    #     plt.xticks(np.arange(0,len(fileList)))
+    #     axes.set_xticklabels(fileList)
+    #     plt.legend(['Short Trial', 'Long Trial']) 
+    #     fig.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/errorplot_spikes_per_sec_nidaq_trials_400fps_jaaba_day_trials.png')
+    # else:
+    #     plot_errorbar(Config_long, numCameras, filepath, fileList, 1)         
     plt.show()     
             
         
