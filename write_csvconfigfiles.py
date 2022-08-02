@@ -47,28 +47,26 @@ def appendWriteConfigFile(filename, config, key, val):
         mydict[key] = val
         writeConfigFile(mydict) 
            
-        
 
-    
 def main():
-    
-    
+
     Config = {
+        
         'filename': '',
         'numCameras': 2,
         'cam_suffix': [0,1], 
         'dir_len': 1,
-        'dir_list': ['C:/Users/27rut/BIAS/misc/signal_slot_day_trials/plugin_latency'],
-        'numFrames':10000,
-        'no_of_trials': 1,
+        'dir_list': ['C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/'],
+        'numFrames':100000,
+        'no_of_trials': 5,
         'framerate': 400,
-        'latency_threshold' : 6.0,
+        'latency_threshold' : 4.0,
         'cam_dir' : 'multi',
-        'detectSpike': '0',
+        #'detectSpike': '0',
         'nidaq_prefix': 'nidaq',
         'f2f_prefix': '',
         'queue_prefix': '',
-        'plugin_prefix': 'signal_slot',
+        'plugin_prefix': 'jaaba_plugin',
         'logging_prefix': '',
         'framegrab_prefix': 'imagegrab',
         'git_commit': '',
@@ -86,13 +84,12 @@ def main():
         'std_spikes_f2f': [],
         'spikes_per_sec_f2f': [],
         'fracIntwspikes_f2f': [],
-        
 
     }
        
-     ## read csv files
-    filename = 'C:/Users/27rut/BIAS/misc/signal_slot_day_trials/' + \
-               'config_files/short/signal_slot_multicamera_shorttrial_run_'         
+    ## read csv files
+    filename = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/' + \
+               'config_files/short/jaaba_plugin_multicamera_shorttrial_run_'         
     Config['git_commit'] = str(ghs.get_sha()) 
     Config['date'] = str(ghs.get_current_date())
     Config['filename'] = filename + Config['git_commit'] + '_' + Config['date'] + '.csv'
@@ -104,14 +101,14 @@ def main():
     f2f_prefix = Config['f2f_prefix']
     queue_prefix  = Config['queue_prefix'] 
     
-    ## set metrics flag
+    #c set metrics flag
     isnidaq = rcs.setFlags(nidaq_prefix)
     isframetoframe = rcs.setFlags(f2f_prefix)
     isqueue = rcs.setFlags(queue_prefix)
     
     latency_metric = rcs.LatencyMetric(isnidaq, isframetoframe, isqueue)
     
-    ## make/set experiment directory
+    # make/set experiment directory
     if latency_metric.isnidaq:
         path_dir = Config['dir_list'][0] + Config['nidaq_prefix'] \
                               + '/' + Config['cam_dir']

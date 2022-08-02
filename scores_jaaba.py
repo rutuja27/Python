@@ -34,7 +34,8 @@ gnd_scores = np.array(scores['allScores']['scores'][0][0])
 #     data = list(f[a_group_key])
 # data = data[0][0:2497]
 
-demo_file = 'C:/Users/27rut/BIAS/build/Release/lift_classifier.csv';
+
+demo_file = 'C:/Users/27rut/BIAS/build/Release/classifierscr_noskip.csv';
 demo_handle = open(demo_file, 'r+');
 demo_pred = csv.reader(demo_handle, delimiter=',')
 demo_pred_scores = []
@@ -46,7 +47,7 @@ demo_pred_scores = np.array(demo_pred_scores)
 
 
 ## predicted from bias jaaba
-bias_pred_file = 'C:/Users/27rut/BIAS/build/Release/classifierscr.csv';
+bias_pred_file = 'C:/Users/27rut/BIAS/build/Release/classifierscr_front.csv';
 bias_pred_handle = open(bias_pred_file, 'r+');
 bias_pred = csv.reader(bias_pred_handle, delimiter=',')
 bias_pred_scores = []
@@ -54,13 +55,23 @@ for idx,row in enumerate(bias_pred):
     bias_pred_scores.append(float(row[1]))
 bias_pred_handle.close()
     
-bias_pred_scores = np.array(bias_pred_scores) 
-# pred_scores = np.reshape(pred_scores, (2497,1))   
+bias_pred_scores = np.array(bias_pred_scores)  
 print(len(bias_pred_scores)) 
 print(len(demo_pred_scores))
 
 print(demo_pred_scores)
 print(bias_pred_scores)
-plt.plot(demo_pred_scores,alpha=0.2)
-plt.plot(bias_pred_scores, alpha=0.2)
+
+#plt.plot(demo_pred_scores,alpha=0.2)
+#plt.plot(bias_pred_scores, alpha=0.2)
+
+plt.plot(demo_pred_scores, color='b', alpha=0.3)
+plt.plot(bias_pred_scores,color='r', alpha=0.3)
+
+#plt.plot(demo_pred_scores, bias_pred_scores,'.')
+plt.title('Comparison of Lift Classifier Score')
+plt.xlabel('Frames')
+plt.ylabel('BIAS JAABA Classifier Score Prediction')
+plt.legend(['BIAS JAABA Classifier Prediction Side+Front','BIAS JAABA Classifier Prediction Front Only'], fontsize=8)
+#plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/comp_biasjaaba_full&front.pdf')           
 plt.show()    

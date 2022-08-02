@@ -24,22 +24,21 @@ def plot_errorbar(Config, numCameras, filepath, fileList, alpha):
     
     shape= ['+', '*', 'x', '.', '^', 'o']
     color = ['r', 'b','g', 'm', 'c', 'k']
-    
-    
+
     for cam_id in range(0, numCameras):
     
         std_arr = np.array(len(fileList) * [0.0])
         mean_arr = np.array(len(fileList) * [0.0])
         
-        for i in range (0,len(fileList)):
+        for i in range(0,len(fileList)):
         
             filename = filepath + fileList[i] + '.csv'      
             rcs.readConfigFile(filename, Config)         
             mean_arr[i] = float(Config['mean_spikes_nidaq'][cam_id]) * Config['framerate']
             std_arr[i] = float(Config['std_spikes_nidaq'][cam_id]) * Config['framerate']
-        
-        
-        plt.errorbar(x=np.arange(0,len(fileList)),y=mean_arr, yerr=std_arr,  marker=shape[cam_id], color=color[cam_id],alpha=alpha)
+
+        plt.errorbar(x=np.arange(0,len(fileList)), y=mean_arr, yerr=std_arr,  marker=shape[cam_id], color=color[cam_id],
+                     alpha=alpha)
 
     
     
@@ -192,14 +191,14 @@ def main():
     cam_dir = 'multi'
     trial_type = 'short'
     
-    flag_std = False
+    flag_std = True
     
     filepath = dir_path + trial_type + '/' +  configfile_prefix + '_' + cam_dir  + 'camera' + '_' + trial_type + 'trial_run_'
     
     if flag_std:
-        fileList = ['41e45_10_25_2021','f312d_10_24_2021' , 'f312d_10_22_2021', 'f312d_10_21_2021']
+        fileList = ['12f17_7_1_2022', '12f17_7_3_2022', '12f17_7_4_2022']
     else:
-        fileList = ['d2b00_11_19_2021']
+        fileList = ['256e8_7_5_2022']
     
     
     if cam_dir == 'multi' and configfile_prefix != 'jaaba_plugin':
@@ -211,6 +210,11 @@ def main():
     if flag_std:
         fig, axes = set_plot_var()
         plot_errorbar(Config_short, numCameras, filepath, fileList, 0.3)
+        plt.xticks(np.arange(0,len(fileList)))
+        axes.set_xticklabels(fileList)
+        plt.legend(['Short Trial', 'Long Trial'])
+        #fig.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/errorplot_spikes_per_sec_nidaq_trials_400fps_'
+        #            + 'jaaba_newspin_2.0.160.0_latencythreshold_7_short_daytrials_twoplugin.png')
     else:
         plot_queue(Config_short, filepath, fileList, 0.5)
     
@@ -229,9 +233,6 @@ def main():
     # else:
     #     plot_errorbar(Config_long, numCameras, filepath, fileList, 1)         
     plt.show()     
-            
-        
-        
-    
+
 if __name__ == "__main__":
     main()
