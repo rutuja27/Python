@@ -14,15 +14,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 
  
-def readcsvFile(filename, arr, arr1, inter_latency):
+def readcsvFile(fhandle, arr, inter_latency):
   
-    data_grab = csv.reader(filename, delimiter=',')
+    data_grab = csv.reader(fhandle, delimiter=',')
     prev=0; 
     prev1=0;   
     count=0;
     for idx,row in enumerate(data_grab):
         if(not inter_latency):
-            arr.append((np.float(row[0]))) 
+            arr.append((np.float(row[0])/1000))
             if(np.float((row[0])) > 5):
                 count+=1;
         else: 
@@ -36,15 +36,16 @@ def readcsvFile(filename, arr, arr1, inter_latency):
                 #arr1.append((np.float(row[2]) - prev1)/1000)
             prev =  (np.float(row[1]))
             #prev1 = (np.float(row[2]))
+    fhandle.close()
     print(count)        
 
 def plot_data(arr, inter_latency, shape, color):
     
     sz = len(arr)
     if inter_latency:
-        plt.plot(arr[0:sz-2],'.',color=color, marker=shape)
+        plt.plot(arr[0:sz-2],'.',color=color, marker=shape,markersize=5)
     else:
-        plt.plot(arr[0:],'.',color=color, marker=shape)
+        plt.plot(arr[0:],'.',color=color, marker=shape,markersize=5)
    
 
 def main():
@@ -52,11 +53,10 @@ def main():
     inter_latency = 0
     no_of_frames = 100000
     cam = ['0', '1']
-    no_of_cam = 1
-     
-    
+    no_of_cam = 2
 
-    dir_list = ['C:/Users/27rut/BIAS/build/Release/']
+    dir_list = ['C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/b0821_9_27_2022/']
+               #['C:/Users/27rut/BIAS/misc/spinnaker_toy_example/bias_demo_example/cam2sys_lat/single_camera/']
                #
                #['C:/Users/27rut/BIAS/build/Release/']
                #['C:/Users/27rut/spinnaker_examples/bin64/vs2015/']
@@ -77,37 +77,36 @@ def main():
 
     fig = plt.figure();
     shapes= ['.', 'x', '^', '*', 'P', '.', '+']
-    color = ['r', 'b']
+    color = ['r', 'b', 'g', 'm', 'c', 'k']
 
 
     count = 0
     for frame_dir in dir_list:
-       
-       for i in range(1,2):
-           
+       for i in range(1,4):
            cam0_list = []
            cam1_list = []
            try:
                if(no_of_cam == 2):
-                   print(frame_dir + 'imagegrab_latency' + cam[0] + '_trial'+ str(i)  + '.csv', 'r+')
-                   cam0_handle = open(frame_dir + 'imagegrab_f2f' + cam[0] + '_trial'+ str(i)  + '.csv', 'r+');
-                   cam1_handle = open(frame_dir + 'imagegrab_f2f' + cam[1] + '_trial'+ str(i)  + '.csv', 'r+');
+                   filename0 = frame_dir + 'imagegrab_start_timecam' + cam[0] + '_short_trial'+ str(i)  + '.csv'
+                   filename1 = frame_dir + 'imagegrab_start_timecam' + cam[1] + '_short_trial'+ str(i)  + '.csv'
+                   cam0_handle = open(filename0, 'r+');
+                   cam1_handle = open(filename1, 'r+');
                else:
-                   print(frame_dir + 'imagegrab_f2f' + cam[0] + '_trial'+ str(i)  + '.csv', 'r+')
-                   cam0_handle = open(frame_dir + 'imagegrab_f2f' + cam[0] + '_trial'+ str(i)  + '.csv', 'r+');
-                   
-            
+                   filename = frame_dir + 'cam2sys_latency_vidread' + '_trialshort' + str(i) + '.csv.';
+                   cam0_handle = open(filename, 'r+');
+
            except IOError:
                print (' File could not be open. Check file location',i)
+               print(filename0)
                return -1;
            if(no_of_cam==2):
                readcsvFile(cam0_handle, cam0_list, inter_latency)
                readcsvFile(cam1_handle, cam1_list, inter_latency)
-               plot_data(cam0_list, inter_latency, shapes[i-1], color[0])
-               plot_data(cam1_list, inter_latency, shapes[i-1], color[1])
+               plot_data(cam0_list, inter_latency, shapes[i-1%7], color[(i-1)%5])
+               #plot_data(cam1_list, inter_latency, shapes[i-1%7], color[(i-1)%5])
            else:
-               readcsvFile(cam0_handle, cam0_list, cam1_list, inter_latency)
-               plot_data(cam0_list ,inter_latency, shapes[i-1], color[0])
+               readcsvFile(cam0_handle, cam0_list, inter_latency)
+               plot_data(cam0_list ,inter_latency, shapes[i-1%7], color[(i-1)%5])
                #plot_data(cam1_list,inter_latency, shapes[i-1], color[1])
                count += len(cam0_list)
           
@@ -116,17 +115,15 @@ def main():
     #plt.plot(5*np.ones((no_of_frames)))
     plt.xlabel('Frames')
     plt.ylabel('Milliseconds')
-    plt.title('Single Camera Trigger-Signal Slot Frame Process Latency')
-    labels = ['Cam 0']
+    plt.title('Video Read Time BIAS JAABA with file open wait')
+    labels = ['Trial 1', 'Trial 2', 'Trial 3']
     plt.legend(labels, fontsize=7)
-    plt.show() 
-    cam0_handle.close()
+    plt.show()
     
     #   
     #
     
-    #fig.savefig('C:/Users/27rut/BIAS/misc/signal_slot_day_trials/figs/signalslot_singlecam__camtrig_process_latency.png')
-
+    #fig.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/b0821_9_27_2022/vidread_biasjaaba_wfopenwait.jpg')
 
 if __name__ == "__main__":
     main()

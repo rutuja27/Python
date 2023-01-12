@@ -67,7 +67,7 @@ def set_plot_var(queue_prefix, no_of_trials):
         ax = axes.get_gridspec()
         
     
-    fig.subplots_adjust(hspace=0.5)
+    fig.subplots_adjust(hspace=0.7)
 
     # if no_of_trials/ > 1:
     #     axes[ax.nrows-1, ax.ncols-2] = plt.subplot2grid((rows, cols), (2,0), colspan = 2)
@@ -75,15 +75,12 @@ def set_plot_var(queue_prefix, no_of_trials):
     if queue_prefix:
         plt.setp(axes, yticks = np.arange(0,20,1), ylim = [0,20])
     else:
-        plt.setp(axes, yticks = np.arange(0,20,2), ylim=[0,20])
+        plt.setp(axes, yticks = np.arange(1,5.0,1), ylim=[1,5.0])
    
     return fig, axes
 
-def readcsvFile_nidaq(filename, arr_lat, arr_cam, cam_id, plugin_prefix):
-    
-    #if cam_id == 1 and plugin_prefix == 'jaaba_plugin':
-    #    return
-        
+def readcsvFile_nidaq(filename, arr_lat, arr_cam, cam_id):
+
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 
@@ -98,8 +95,7 @@ def readcsvFile_nidaq(filename, arr_lat, arr_cam, cam_id, plugin_prefix):
                                                 
         else:
             arr_lat[idx] = (((np.float(row[1]) - arr_cam[idx] ) * 0.02))
-        
-                         
+
     fhandle.close()
 
     
@@ -115,22 +111,20 @@ def readcsvFile_int(filename, arr, cam_id, plugin_prefix):
         arr[idx] = np.int(row[0])                    
     fhandle.close()
     
-def readcsvFile_float(filename, arr, cam_id, plugin_prefix):
+def readcsvFile_float(filename, arr):
 
-    fhandle = open(filename)
+    fhandle = open(filename,'r')
     data_grab = csv.reader(fhandle, delimiter=',')
 
     for idx,row in enumerate(data_grab):
         arr[idx] = np.float(row[0])                    
     fhandle.close()
     
-def readcsvFile_f2f(filename, arr, f2f_flag, cam_id, plugin_prefix):
- 
-    #if cam_id == 1 and plugin_prefix == 'jaaba_plugin':
-    #    return   
- 
-    fhandle = open(filename)
+def readcsvFile_f2f(filename, arr, f2f_flag):
+
+    fhandle = open(filename,'r')
     data_grab = csv.reader(fhandle, delimiter=',')
+
     for idx,row in enumerate(data_grab):
                      
         if f2f_flag:
@@ -172,7 +166,7 @@ def readLatency_data(lat_dat, testconfig, lat_metric, biasmode_prefix, \
             + trial_suffix + str(i+1) + '.csv'
             print(filename)
             readcsvFile_nidaq(filename, lat_dat.lat_nidaq[i], lat_dat.lat_camtrig[i], \
-                          cam_id, plugin_prefix)
+                          cam_id)
                 
         # read latency frame to frame from pc timings
         if lat_metric.isframetoframe:
@@ -185,7 +179,7 @@ def readLatency_data(lat_dat, testconfig, lat_metric, biasmode_prefix, \
                 testconfig['f2f_prefix'] +  'cam' + testconfig['cam_suffix'][cam_id]\
                 + trial_suffix + str(i+1) + '.csv'
                 
-                readcsvFile_f2f(filename, lat_dat.lat_f2f[i], 1, cam_id, plugin_prefix)
+                readcsvFile_f2f(filename, lat_dat.lat_f2f[i], 1)
             else:
                     
                 filename = path_dir + testconfig['nidaq_prefix'] \
@@ -194,7 +188,7 @@ def readLatency_data(lat_dat, testconfig, lat_metric, biasmode_prefix, \
                 "process_time" +  'cam' + testconfig['cam_suffix'][cam_id]\
                 + trial_suffix + str(i+1) + '.csv'
                 
-                readcsvFile_f2f(filename, lat_dat.lat_f2f[i], 0, cam_id, plugin_prefix)
+                readcsvFile_f2f(filename, lat_dat.lat_f2f[i], 0)
             
         # read queue size
         if lat_metric.isqueue:
@@ -214,7 +208,7 @@ def readLatency_data(lat_dat, testconfig, lat_metric, biasmode_prefix, \
             testconfig['cam_suffix'][cam_id] + trial_suffix + str(i+1) + '.csv'
 
             #print(filename)
-            readcsvFile_float(filename, lat_dat.lat_nidaq_filt[i], cam_id, plugin_prefix)
+            readcsvFile_float(filename, lat_dat.lat_nidaq_filt[i])
                      
                     
 def readConfigFile(filename, config):

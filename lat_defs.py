@@ -28,3 +28,14 @@ class BiasConfigMode:
         self.islogging = flag2
         self.isPlugin = flag3
         self.isJaaba = flag4
+
+class Scores:
+
+    def __init__(self, arr1,arr2,arr3,arr4,arr5, arr6):
+
+        self.score_ts = arr1
+        self.score_side_ts = arr2
+        self.score_front_ts = arr3
+        self.scores= arr4
+        self.frameCount = arr5
+        self.view = arr6

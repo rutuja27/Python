@@ -12,10 +12,10 @@ import numpy as np
 def readcsvFile(filename, arr):
     data_grab = csv.reader(filename, delimiter=',')
     for idx,row in enumerate(data_grab):
-        arr.append(np.float(row[1]))        
+        arr.append(np.float(row[0]))
 
 def get_peaks(arr):
-    return arr > 5000
+    return arr > 3000
    
     
 def bins_labels(bins, **kwargs):
@@ -26,8 +26,8 @@ def bins_labels(bins, **kwargs):
 def main():
     
     ##imagegrab_file = open('C:/build-Release/Release/imagegrab_0.csv', 'r')
-    imagegrab_file = open('C:/Users/27rut/BIAS/build/Release/imagegrab_f2flatency0.csv','r')
-    len_of_frames = 49999
+    imagegrab_file = open('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/imagegrab_process_timecam0_short_trial2.csv','r')
+    len_of_frames = 100000
     num_of_trials = 1;
     
     latency = []   
@@ -42,7 +42,7 @@ def main():
     
     #count peaks
     count_peaks = np.array([np.count_nonzero(pk) for pk in peaks])
-    print(sum(count_peaks))
+    print('Number of peaks',sum(count_peaks))
     
     #get max peaks   
     max_peaks = np.array([max(pk) for pk in latency] )
@@ -66,7 +66,6 @@ def main():
     peak_ind_combine = np.array(peak_ind_combine)
     
     #get peak differences
-   
     peak_diff = [np.diff(peak_ind[keys]) for keys in peak_ind.keys() ]
     peak_diff_combine = [col for row in peak_diff for col in row]
     peak_diff_combine = np.array(peak_diff_combine)

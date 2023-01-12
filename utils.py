@@ -44,37 +44,24 @@ def readConfigFile(filename, config):
                 else:
                     continue;
 
-def readcsvFile_nidaq(filename, arr_lat, arr_cam, cam_id, plugin_prefix):
-    # if cam_id == 1 and plugin_prefix == 'jaaba_plugin':
-    #    return
+def readcsvFile_nidaq(filename, arr_cam, arr_lat):
+
+    with open(filename, 'r', newline='') as f:
+        frm_id=0
+        config_reader = csv.reader(f, delimiter=',')
+        for row in config_reader:
+            arr_cam[frm_id] = float(row[0])*0.02
+
+            arr_lat[frm_id] = (float(row[1])*0.02)
+            frm_id += 1
+
+def readcsvFile_int(filename, arr, scaling_factor):
 
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 
     for idx, row in enumerate(data_grab):
-
-        if cam_id == 0:
-
-            arr_cam[idx] = ((np.float(row[0])))  ## will store the count corresponding to camera trigger
-            arr_lat[idx] = (((np.float(row[1]) - np.float(row[0])) * 0.02))  ## latency calculation between
-            ## event and camera trigger, fast clock is 50khz
-            ## hence multiplying factor is (1/50khz- period) 0.02 to calculate latency
-
-        else:
-            arr_lat[idx] = (((np.float(row[1]) - arr_cam[idx]) * 0.02))
-
-    fhandle.close()
-
-
-def readcsvFile_int(filename, arr, cam_id, plugin_prefix):
-    # if cam_id == 1 and plugin_prefix == 'jaaba_plugin':
-    #    return
-
-    fhandle = open(filename)
-    data_grab = csv.reader(fhandle, delimiter=',')
-
-    for idx, row in enumerate(data_grab):
-        arr[idx] = np.int(row[0])
+        arr[idx] = np.int(row[0])/scaling_factor
     fhandle.close()
 
 
@@ -102,7 +89,7 @@ def readcsvFile_f2f(filename, arr, f2f_flag, cam_id, plugin_prefix):
                 arr[idx] = (np.float(row[0]) - prev) / 1000
                 prev = np.float(row[0])
         else:
-            arr[idx] = (np.float(row[0]) / 1000)
+            arr[idx] = np.float(row[0]) / 1000
 
     fhandle.close()
 
@@ -182,6 +169,84 @@ def setflag(flag_prefix):
         return 1
     else:
         return 0
+
+
+## distance - distance between peaks
+## height -  definition of height of a peak
+def maxPeak(latency_arr, latency_filt_arr, height):
+
+    peaks = []
+    numFrames = len(latency_arr)
+    i = 0
+
+    while i < numFrames:
+        bout_count = 0
+        if latency_arr[i] >= height:
+            peaks.append(i)
+            latency_filt_arr[i] = latency_arr[i]
+            i += 1
+            while i < numFrames and latency_arr[i] >= height:
+                latency_filt_arr[i] = 2.2
+                bout_count += 1
+                i += 1
+        else:
+            latency_filt_arr[i] = latency_arr[i]
+            i += 1
+
+    # ## get filtered indexes
+    # for aa in peaks:
+    #     latency_filt_arr[aa] = latency_arr[aa]
+
+    return [len(peaks), peaks]
+
+## index is the column to read from score file
+## flag_gt - if score file is gt or not
+def read_score(filename,arr_scr,flag_gt,index):
+
+    with open(filename, 'r', newline='') as f:
+        config_reader = csv.reader(f, delimiter=',')
+        for idx,row in enumerate(config_reader):
+            if(not flag_gt):
+                if(idx ==0):
+                   continue
+                arr_scr[idx-1] = np.float(row[index])
+            else:
+                arr_scr[idx] = np.float(row[index])
+    f.close()
+
+def read_score_view(filename, arr_scr_view, arr_scr, arr_scr_side,
+                    arr_scr_front, flag_gt, index):
+
+    with open(filename, 'r', newline='') as f:
+        config_reader = csv.reader(f, delimiter=',')
+        for idx,row in enumerate(config_reader):
+            if(not flag_gt):
+                if (idx == 0):
+                    continue
+                arr_scr_view[idx-1] = np.int(row[index])
+                if(arr_scr_view[idx-1] == 1):
+                    arr_scr_side[idx-1] = np.float(row[3])
+                elif(arr_scr_view[idx-1] == 2):
+                    arr_scr_front[idx-1] = np.float(row[3])
+                else:
+                    arr_scr[idx-1] = np.float(row[3])
+    f.close()
+
+def readScoreData(filename, scr_obj, flag_gt):
+
+    with open(filename, 'r', newline='') as f:
+        config_reader = csv.reader(f, delimiter=',')
+        for idx,row in enumerate(config_reader):
+            if not flag_gt:
+                if idx ==0:
+                    continue
+                else:
+                    scr_obj.score_ts[idx - 1] = np.float(row[0])
+                    scr_obj.score_side_ts[idx - 1] = np.float(row[1])
+                    scr_obj.score_front_ts[idx - 1] = np.float(row[2])
+                    scr_obj.scores[idx - 1] = np.float(row[3])
+                    scr_obj.frameCount[idx - 1] = np.int(row[4])
+                    scr_obj.view[idx -1 ] = np.int(row[5])
 
 
 

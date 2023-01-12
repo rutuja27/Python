@@ -13,6 +13,7 @@ from scipy.signal import find_peaks
 from collections import namedtuple
 import re
 import write_csvconfigfiles as wcs
+import plotting_code as pc
 
 
 class LatencyData:  
@@ -25,7 +26,6 @@ class LatencyData:
         self.lat_camtrig = arr4
         self.lat_nidaq_filt = arr5
         self.process_time= arr6
-      
           
 class LatencyMetric:
 
@@ -107,25 +107,17 @@ def readData(testconfig, lat_metric, lat_data_cam1, lat_data_cam2, bias_config):
 
         
 def readcsvFile_nidaq(filename, arr_lat, arr_cam, cam_id, plugin_prefix):
-    
-    if cam_id == 1 and plugin_prefix == 'jaaba_plugin':
-        return
-        
+
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 
     for idx, row in enumerate(data_grab):
-            
-        if cam_id == 0:
-            
-            arr_cam[idx] = ((np.float(row[0]))) ## will store the count corresponding to camera trigger 
-            arr_lat[idx] = (((np.float(row[1])-np.float(row[0])) * 0.02)) ## latency calculation between 
+
+        arr_cam[idx] = ((np.float(row[0]))) ## will store the count corresponding to camera trigger
+        arr_lat[idx] = (((np.float(row[1])-np.float(row[0])) * 0.02)) ## latency calculation between
                                                ## event and camera trigger, fast clock is 50khz
                                                ## hence multiplying factor is (1/50khz- period) 0.02 to calculate latency
-            #print((np.float(row[1])-np.float(row[0])) * 0.02)                                        
-        else:
-            arr_lat[idx] = (((np.float(row[1]) - arr_cam[idx] ) * 0.02))
-            #print((np.float(row[1]) - arr_cam[idx] ) * 0.02)
+        #print((np.float(row[1])-np.float(row[0])) * 0.02)
                          
     fhandle.close()
     
@@ -181,6 +173,7 @@ def readLatency_data(lat_dat, testconfig, lat_metric, biasmode_prefix, \
 
     for i in range(0, no_of_trials):
         # read latency readings from nidaq
+        print('Trial', i)
         if lat_metric.isnidaq:
 
             filename = path_dir + testconfig['nidaq_prefix'] \
@@ -231,7 +224,6 @@ def process_data(testconfig, lat_metric, lat_data_cam1, lat_data_cam2,
     cam_suffix = testconfig['cam_suffix']
 
     readData(testconfig, lat_metric, lat_data_cam1, lat_data_cam2, bias_config)
-
     cam_id = int(cam_suffix[0])
     meanNumberSpikes(lat_data_cam1, testconfig, lat_metric, cam_id, debug_flag)
 
@@ -307,9 +299,10 @@ def analyze_data(testconfig, lat_metric, \
                                                 np.array(no_of_trials*[numFrames * [0.0]]),\
                                                 np.array(no_of_trials*[numFrames * [0.0]]),\
                                                 np.array(no_of_trials*[numFrames * [0.0]]))
-                
+
+
         process_data(testconfig, lat_metric, latency_data_cam1, latency_data_cam2, \
-                     bias_config, debug_flag)        
+                     bias_config, debug_flag)
         
     
     if plugin_prefix:
@@ -680,7 +673,8 @@ def plot_data(lat_data_cam1, lat_data_cam2, lat_metric, bias_config, testconfig,
     shape = ['+', '*', 'x', '.', '^', 'o']
     color = ['r', 'b','g', 'm', 'c', 'k']
     alpha = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]    
-    labels = [['Cam 1', 'Cam 2'], ['Cam 1']] 
+    labels = [['Cam 1', 'Cam 2'], ['Cam 1']]
+    marker_size=6
 
     if(numFrames > 100000):
         trial_suffix = '_long_trial'
@@ -703,26 +697,20 @@ def plot_data(lat_data_cam1, lat_data_cam2, lat_metric, bias_config, testconfig,
             arr1 = lat_data_cam1.lat_nidaq
             arr2 = lat_data_cam2.lat_nidaq
 
-            fig, axes = set_plot_var('', no_of_trials)
-            plot_raw_data(arr1, shape, color, alpha, labels[0], axes, no_of_trials,\
-                              latency_threshold, numFrames, title, 0)
+            fig, axes = pc.set_plot_var('', 1,numFrames, 20)
+            pc.plot_raw_single_axis(arr1, arr2,shape, color, alpha, labels[0], axes, 1,\
+                              latency_threshold, numFrames, title, 0,marker_size)
             if not debug_flag:
                 fig.savefig(figsaveFile + 'cam0' + '.png')
-
-            fig, axes = set_plot_var('', no_of_trials)
-            plot_raw_data(arr2, shape, color, alpha, labels[0], axes, no_of_trials,\
-                             latency_threshold, numFrames, title, 1)
-            if not debug_flag:
-                fig.savefig(figsaveFile + 'cam1' + '.png')
             
         else:
             arr1 = lat_data_cam1.lat_nidaq
             fig, axes = set_plot_var('', no_of_trials)
-            plot_raw_data(arr1, shape, color, alpha, labels[1], axes, no_of_trials,\
-                      latency_threshold, numFrames, title, 0)
+            pc.plot_raw_data(arr1, shape, color, alpha, labels[1], axes, 1,\
+                      latency_threshold, numFrames, title, 0,marker_size)
             if not debug_flag:
                 fig.savefig(figsaveFile + 'cam0' + '.png')
-
+        plt.show()
     if lat_metric.isframetoframe:
 
         figsaveFile = testconfig['dir_list'][0] + testconfig['f2f_prefix'] + '/' + \
@@ -745,23 +733,18 @@ def plot_data(lat_data_cam1, lat_data_cam2, lat_metric, bias_config, testconfig,
 
             # plotting variables
             fig, axes = set_plot_var('', no_of_trials)
-            plot_raw_data(arr1, shape, color, alpha, labels, axes, no_of_trials,\
-                          latency_threshold, numFrames, title, 0)
-            if not debug_flag:
-                fig.savefig(figsaveFile + 'cam0' + '.png')
-
-            fig, axes = set_plot_var('', no_of_trials)
-            plot_raw_data(arr2, shape, color, alpha, labels, axes, no_of_trials,\
-                          latency_threshold, numFrames, title, 1)
+            pc.plot_raw_single_axis(arr1,arr2, shape, color, alpha, labels, axes, no_of_trials,\
+                          latency_threshold, numFrames, title, 0,marker_size)
             if not debug_flag:
                 fig.savefig(figsaveFile + 'cam0' + '.png')
 
         else:
             arr1 = lat_data_cam1.lat_f2f
-            plot_raw_data(arr1, shape, color, alpha, labels, axes, no_of_trials,\
-                      latency_threshold, numFrames, title, 0)
+            pc.plot_raw_data(arr1, shape, color, alpha, labels, axes, no_of_trials,\
+                      latency_threshold, numFrames, title, 0,marker_size)
             if not debug_flag:
                 fig.savefig(figsaveFile + 'cam0' + '.png')
+        plt.show()
                 
         fig.legend(axes, labels, loc = 'upper right')
 
@@ -892,10 +875,9 @@ def meanNumberSpikes(lat_data, testconfig, lat_metric, cam_id, debug_flag):
         if len(testconfig['count_latencyspikes_f2f']) < numCameras: ## check if string is empty
             testconfig['count_latencyspikes_f2f'] = np.array(int(testconfig['numCameras'])*[no_of_trials * [0]])
             testconfig['average_normspikes_f2f'] = np.array(int(testconfig['numCameras'])*[no_of_trials * [0.0]])
-           
-    
+
     count_numSpikes(lat_data, testconfig, lat_metric, cam_id)
-    stddevNumSpikes(testconfig, lat_metric, cam_id)    
+    stddevNumSpikes(testconfig, lat_metric, cam_id)
     mean_nsecintervals_wspikes(lat_data, testconfig, lat_metric, cam_id, framerate)
         
     if lat_metric.isnidaq:    
@@ -925,7 +907,6 @@ def meanNumberSpikes(lat_data, testconfig, lat_metric, cam_id, debug_flag):
         
 def mean_nsecintervals_wspikes(lat_data, testconfig, lat_metric, cam_id, interval_length):
 
-   
     numCameras = int(testconfig['numCameras'])
     no_of_trials = int(testconfig['no_of_trials'])
     nframes = int(testconfig['numFrames'])
@@ -987,8 +968,7 @@ def logging_function(testconfig, cam_id):
         
 
 def main():
-    
-    
+
     ## read csv files
     Config = {
         
@@ -1023,12 +1003,11 @@ def main():
         'std_spikes_f2f': [],
         'spikes_per_sec_f2f': [],
         'fracIntwspikes_f2f': [],
-        
          
     }
                    
     ## read configuration file
-    filename = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/config_files/short/jaaba_plugin_multicamera_shorttrial_run_12f17_7_1_2022.csv'
+    filename = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/config_files/short/jaaba_plugin_multicamera_imagegrab_shorttrial_run_d417d_12_12_2022.csv'
     readConfigFile(filename,Config)  
 
     ## Experiment related configuration
@@ -1076,7 +1055,6 @@ def main():
     ## Debug flag
     debug = False
 
-                           
     analyze_data(Config, latency_metric, \
                  biasConig_mode, debug)
                     
