@@ -342,6 +342,7 @@ def count_numSpikes(lat_dat, testconfig, lat_metric, cam_id):
     numFrames = testconfig['numFrames']
     calc_mean = 1
     avg=0.0
+    print('*************', latency_threshold)
 
     if(lat_metric.isframetoframe and len(testconfig['count_latencyspikes_f2f']) != 0):
         for trial_id in range(0,no_of_trials):
@@ -365,7 +366,7 @@ def count_numSpikes(lat_dat, testconfig, lat_metric, cam_id):
 
                 print('Count Peaks Jaaba', count_peaks)
                 if len(testconfig['count_latencyspikes_nidaq']) < no_of_trials:
-                    testconfig['count_latencyspikes_nidaq'][cam_id][trial_id] = count_peaks
+                    testconfig['count_latencyspikes_nidaq'][cam_id][trial_id] = int(count_peaks)
             
                 # bad name choice
                 if len(testconfig['average_normspikes_nidaq']) < no_of_trials:
@@ -430,7 +431,7 @@ def maxPeak(latency_arr, height, distance, latency_filt_arr, testconfig):
      
     while i < numFrames:
         bout_count=0
-        if latency_arr[i] >= height:
+        if latency_arr[i] > height:
             peaks.append(i)
             latency_filt_arr[i] = latency_arr[i]
             i += 1
@@ -1007,7 +1008,7 @@ def main():
     }
                    
     ## read configuration file
-    filename = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/config_files/short/jaaba_plugin_multicamera_imagegrab_shorttrial_run_d417d_12_12_2022.csv'
+    filename = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/config_files/short/jaaba_plugin_multicamera_shorttrial_run_5e468_2_6_2023.csv'
     readConfigFile(filename,Config)  
 
     ## Experiment related configuration

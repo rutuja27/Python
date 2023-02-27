@@ -16,13 +16,18 @@ def match_scores(arr1, arr2):
 
     count=0
     idx=0
+    cnt_mismatch=0
     for (scr1, scr2) in zip(arr1,arr2):
         if round(scr1,3) == round(scr2,3):
             count +=1
         else:
-            print(scr1,scr2)
+            if(round(scr1,3)==0 or round(scr2,3) ==0):
+                continue
+            else:
+                cnt_mismatch += 1
+                print(scr1,scr2)
         idx+=1
-    print("Number of matching scores" ,count)
+    print("Number of matching scores" ,count, cnt_mismatch)
 
 def readScore_ts(arr1):
 
@@ -74,7 +79,7 @@ def main():
 
 
     ## predicted from bias jaaba
-    bias_pred_file = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/classifier_trial1.csv';
+    bias_pred_file = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/c1a39_2_21_2023/classifier_trial2.csv';
 
     bias_pred = pd.read_csv(bias_pred_file)
     bias_pred_ts = bias_pred['Score ts']
@@ -85,15 +90,15 @@ def main():
     for idx,row in enumerate(bias_pred_scrhd):
         if(idx==0):
            continue
-        bias_pred_scores.append(float(row[1]))
+        bias_pred_scores.append(float(row[3]))
     bias_pred_handle.close()
 
-    #match_scores(bias_pred_scores, demo_pred_scores)
+    match_scores(bias_pred_scores, demo_pred_scores)
     #readScore_ts(bias_pred_ts[140:-1])
 
     #plt.plot(demo_pred_scores[:],color='b', alpha=0.3)
     #plt.plot(bias_pred_scores[:-1], color='r', alpha=0.3)
-    plt.plot(demo_pred_scores[150:], bias_pred_scores[150:],'.')
+    plt.plot(demo_pred_scores[:], bias_pred_scores[:],'.')
 
     plt.title('Lift Classifier Prediction')
     plt.xlabel('JAABA Offline Classifier Prediction Score')

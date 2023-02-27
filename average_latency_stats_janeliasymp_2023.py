@@ -6,7 +6,7 @@ import lat_defs as ld
 
 def main():
 
-    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/'
+    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/86b0a_2_15_2023/'
     no_of_trials = 5
     numFrames = 100000
 
@@ -54,7 +54,8 @@ def main():
     image_grab_cam1_avg=0
     jaaba_cam0_avg=0
     jaaba_cam1_avg=0
-
+    jab_inter_cam0 = []
+    jab_inter_cam1 = []
 
     for i in range(0,no_of_trials):
 
@@ -92,10 +93,13 @@ def main():
         #compute sum to calculate averages
         image_grab_cam0_avg += np.sum(imagegrab_data_cam0.lat_process_time[i][:-1])
         image_grab_cam1_avg += np.sum(imagegrab_data_cam1.lat_process_time[i][:-1])
+        jaaba_data_cam0.lat_process_time[i][jaaba_data_cam0.lat_process_time[i] < 0.0] = 0
+        jaaba_data_cam1.lat_process_time[jaaba_data_cam1.lat_process_time < 0.0] = 0
+        print(np.amax(imagegrab_data_cam0.lat_process_time[i][:-1]))
 
-    perc = [50,75,90,95,98]
-    image_grab_cam0_percentile = np.percentile(imagegrab_data_cam0.lat_process_time, perc)
-    image_grab_cam1_percentile = np.percentile(imagegrab_data_cam1.lat_process_time, perc)
+    perc = [50,99]
+    image_grab_cam0_percentile = np.percentile(imagegrab_data_cam0.lat_process_time[:][:-1], perc)
+    image_grab_cam1_percentile = np.percentile(imagegrab_data_cam1.lat_process_time[:][:-1], perc)
     jaaba_cam0_percentile = np.percentile(jaaba_data_cam0.lat_process_time, perc)
     jaaba_cam1_percentile = np.percentile(jaaba_data_cam1.lat_process_time, perc)
 
@@ -106,6 +110,7 @@ def main():
 
     #computing averages
     camera_cap_avg = 0.2
+
     image_grab_cam0_avg = image_grab_cam0_avg/(numFrames*no_of_trials)
     image_grab_cam1_avg = image_grab_cam1_avg/(numFrames*no_of_trials)
     jaaba_cam0_avg = np.sum(np.sum(jaaba_data_cam0.lat_process_time))/(numFrames*no_of_trials)
@@ -127,11 +132,12 @@ def main():
     scr_ts_percentle = np.percentile(ord_classifier_scr_ts, perc)
     print('Percentile scores collection', scr_ts_percentle)
 
-    plt.figure(figsize=(10,4))
+    plt.figure(figsize=(15,8))
     ax1=plt.gca()
-    height=0.5
+    height=0.8
     alpha1=0.3
     alpha2=0.6
+    labels = ['Camera capture time', 'Image transfer time', 'Behavior classification time', 'Scores collection time']
     ax1.barh(['Cam 0'], camera_cap_avg, height=height, color='blue', alpha=alpha1)
     ax1.barh(['Cam 0'], image_grab_cam0_avg, left=camera_cap_avg,height=height, color='green', alpha=alpha1)
     ax1.barh(['Cam 0'], jaaba_cam0_avg, left=image_grab_cam0_avg+camera_cap_avg, height=height,color='brown',alpha=alpha1)
@@ -144,30 +150,56 @@ def main():
     ax1.barh(['Cam 1'], scr_ts_avg, left=image_grab_cam1_avg + jaaba_cam1_avg + camera_cap_avg, height=height,
              color='orange', alpha=alpha2)
     plt.xticks(np.arange(0,6.5,0.5))
-    plt.xlabel('Time ms', fontsize=10)
-    plt.title('Average Latency of the BIAS-JAABA pipeline')
+    plt.legend(labels, loc='lower right')
+    plt.xlabel('Time ms', fontsize=15)
+    plt.title('Average Latency of the Behavior Classsifier pipeline', fontsize=20)
     plt.savefig('C:/Users/27rut/BIAS/misc/janelia_symposium_figures/avg_latency_plot.jpg')
 
-    plt.figure(figsize=(10, 4))
+    plt.figure(figsize=(15, 8))
     ax2=plt.gca()
-    height = 0.5
+    height = 0.30
     alpha1 = 0.3
-    alpha2 = 0.6
+    alpha2 = 0.8
+    labels = ['Camera capture time', 'Image transfer time', 'Behavior classification time', 'Scores collection time']
+    idx=0
     for i in range(len(perc)-1,-1,-1):
 
         ylabel = str(perc[i])
-        ax2.barh([ylabel], camera_cap_avg, height=height, color='blue', alpha=alpha1)
-        ax2.barh([ylabel], image_grab_cam0_percentile[i], left=camera_cap_avg, height=height, color='green', alpha=alpha1)
-        ax2.barh([ylabel], jaaba_cam0_percentile[i], left=image_grab_cam0_percentile[i] + camera_cap_avg, height=height, color='brown',
-                 alpha=alpha1)
-        ax2.barh([ylabel], ord_classifier_scr_ts[i], left=image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + camera_cap_avg, height=height,
-                 color='orange', alpha=alpha1)
+        ax2.barh(ylabel, camera_cap_avg, height=2*height, color='blue', alpha=alpha1, align='center',label=labels[0])
+        ax2.barh(ylabel, image_grab_cam0_percentile[i], left=camera_cap_avg, height=2*height, color='green',\
+                alpha=alpha1, label=labels[0])
+        ax2.barh(ylabel, jaaba_cam0_percentile[i], left=image_grab_cam0_percentile[i] + camera_cap_avg, height=2*height \
+                 , color='lightsalmon', alpha=alpha1, label=labels[0])
+        ax2.barh(ylabel, ord_classifier_scr_ts[i], left=image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + \
+                 camera_cap_avg, height=2*height, color='orange', alpha=alpha1, label=labels[0])
+        total = ord_classifier_scr_ts[i]+ image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + \
+                 camera_cap_avg
+        if idx ==4 :
+            ax2.text(total+0.1, idx-0.2, 'Cam 0', color='black', fontweight='bold')
 
-    plt.xticks(np.arange(0, 10, 0.5))
+        ax2.barh(ylabel, camera_cap_avg, height=height, color='blue', alpha=alpha2, align='edge', label = labels[1])
+        ax2.barh(ylabel, image_grab_cam1_percentile[i], left=camera_cap_avg, height=height, color='green',
+                 alpha=alpha2, align='edge',label = labels[1])
+        ax2.barh(ylabel, jaaba_cam1_percentile[i], left=image_grab_cam1_percentile[i] + camera_cap_avg, height=height,
+                 color='lightsalmon',alpha=alpha2, align='edge' , label = labels[1])
+        ax2.barh(ylabel, ord_classifier_scr_ts[i],
+                 left=image_grab_cam1_percentile[i] + jaaba_cam1_percentile[i] + camera_cap_avg, height=height,
+                 color='orange', alpha=alpha2, align='edge', label = labels[1])
+        total = ord_classifier_scr_ts[i] + image_grab_cam1_percentile[i] + jaaba_cam1_percentile[i] + \
+                camera_cap_avg
+        if idx==4:
+            ax2.text(total + 0.1, idx + 0.10, 'Cam 1', color='black', fontweight='bold')
+        idx += 1
+
+    plt.xticks(np.arange(0, 10, 0.5),fontsize=16)
+    plt.yticks(fontsize=16)
+    plt.legend(labels, fontsize=18)
+    plt.xlabel('Time ms',fontsize=20)
+    plt.ylabel('Percentiles',fontsize=20)
+    plt.title('Percentile of Latency Distribution Behavior Classifier Pipeline',fontsize=24)
+    plt.savefig('C:/Users/27rut/BIAS/misc/janelia_symposium_figures/percentile_latency_plot.jpg')
 
     plt.show()
-
-
 
 if __name__ == "__main__":
     main()

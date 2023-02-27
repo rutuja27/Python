@@ -74,7 +74,7 @@ def main():
 #files
     filepath = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/'
 
-    trial_type = '1'
+    trial_type = '3'
     numCameras=2
 
     imagegrab_file_cam0 = filepath + 'imagegrab_start_timecam0_short_trial' + trial_type + '.csv'
@@ -111,7 +111,7 @@ def main():
     classifier_scr_front_file = filepath + 'classifier_scr_front' + trial_type + '.csv'
     classifier_scr_file_gt = filepath + 'lift_classifier.csv'#'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores_new/lift_classifier_side.csv'
 
-    numFrames = 100000
+    numFrames = 2498
     imagegrab_process_time_cam0 = np.array(numFrames*[0.0])
     imagegrab_process_time_cam1 = np.array(numFrames * [0.0])
     imagegrab_start_cam0 = np.array(numFrames * [0.0])
@@ -157,7 +157,7 @@ def main():
     ut.readcsvFile_int(imagegrab_file_cam0, imagegrab_start_cam0, 1)
     ut.readcsvFile_int(img_proc_cam0, imagegrab_process_time_cam0,1000)
     ut.readcsvFile_nidaq(imagegrab_nidaq_cam0, image_nidaq_camtrig0, image_nidaq_cam0)
-    #readcsvFile_int(image_nidaqThres_cam0, image_nidaqThres0)
+    ut.readcsvFile_int(image_nidaqThres_cam0, image_nidaqThres0,1)
     #readcsvFile(img_push_time_cam0, image_push_time_cam0)
     ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0)
     #ut.readcsvFile_int(jaaba_nidaqThres_cam0, jaaba_nidaqThres0,1)
@@ -168,7 +168,7 @@ def main():
       ut.readcsvFile_int(img_proc_cam1, imagegrab_process_time_cam1,1000)
       #readcsvFile(img_push_time_cam1, image_push_time_cam1)
       ut.readcsvFile_nidaq(imagegrab_nidaq_cam1, image_nidaq_camtrig1, image_nidaq_cam1)
-      #readcsvFile_int(image_nidaqThres_cam1, image_nidaqThres1)
+      ut.readcsvFile_int(image_nidaqThres_cam1, image_nidaqThres1, 1)
       ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1)
       #ut.readcsvFile_int(jaaba_nidaqThres_cam1, jaaba_nidaqThres1 ,1)
       #ut.readcsvFile_int(jaaba_curTimecam1_file, jaaba_curTimecam1, 1)
@@ -178,10 +178,10 @@ def main():
 
     ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, 1000)
     ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, 1000)
-    ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0, 1)
-    ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1, 1)
-    ut.readcsvFile_int(jaaba_endfile_cam0, jaaba_end_cam0, 1)
-    ut.readcsvFile_int(jaaba_endfile_cam1, jaaba_end_cam1, 1)
+    #ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0, 1)
+    #ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1, 1)
+    ut.readcsvFile_int(jaaba_endfile_cam0, jaaba_end_cam0, 1000)
+    ut.readcsvFile_int(jaaba_endfile_cam1, jaaba_end_cam1, 1000)
 
     ## read ts from score files
     ut.read_score(classifier_scr_file, classifier_side_scr_ts, 0, 1)
@@ -192,6 +192,9 @@ def main():
     image_nidaq_cam1 = image_nidaq_cam1 - image_nidaq_camtrig0
     jaaba_nidaqcam0 = jaaba_nidaqcam0 - image_nidaq_camtrig0
     jaaba_nidaqcam1 = jaaba_nidaqcam1 - image_nidaq_camtrig0
+    jaaba_nidaqcam0[jaaba_nidaqcam0 < 0] = 0
+    jaaba_nidaqcam1[jaaba_nidaqcam1 < 0] = 0
+    print('Imagegrab cam trigger' , image_nidaq_camtrig0)
 
     jaaba2imaggrab_cam0_pc_time = jaaba_start_cam0 - imagegrab_start_cam0
     jaaba2imaggrab_cam1_pc_time = jaaba_start_cam1 - imagegrab_start_cam1
@@ -199,6 +202,7 @@ def main():
     dif_jaaba_end = abs(jaaba_end_cam0 - jaaba_end_cam1)
     dif_imagegrab = abs(imagegrab_start_cam0 - imagegrab_start_cam1);
     img_min = np.minimum(imagegrab_start_cam0,imagegrab_start_cam1);
+    img_min_nidaq = np.minimum(image_nidaq_cam0, image_nidaq_cam1);
 
     jaaba2imagegrab_cam0_nidaq_time = ((jaaba_curTimecam0/1000)-jaaba_nidaq_camtrig0) - image_nidaq_cam0
     jaaba2imagegrab_cam1_nidaq_time = ((jaaba_curTimecam1/1000)-jaaba_nidaq_camtrig1) - image_nidaq_cam1
@@ -208,7 +212,11 @@ def main():
     cam0_total = (jaaba_end_cam0 - imagegrab_start_cam0)/1000
     cam1_total = (jaaba_end_cam1 - imagegrab_start_cam1)/1000
 
-    total_lat = (classifier_scr_ts[:] - img_min[1:])/1000
+    #total_lat = (classifier_scr_ts[:-1]*0.02 - image_nidaq_camtrig0[1:-1])
+    print(np.minimum(imagegrab_start_cam1[1:-1]/1000,imagegrab_start_cam0[1:-1]/1000))
+    total_lat = (classifier_scr_ts[:-1]/1000) - np.minimum(imagegrab_start_cam1[1:-1]/1000,imagegrab_start_cam0[1:-1]/1000)
+    total_lat[total_lat < 0] = 0
+    print('Skipped in both views' ,np.argwhere(total_lat < 0))
     print(np.sum(total_lat)/(numFrames-1))
     print(np.sum(total_lat > 6))
 
@@ -217,13 +225,16 @@ def main():
       jaaba_expTimecam0[j] = imagegrab_start_cam0[0] + (2500*(j+1)) + 2000
       jaaba_expTimecam1[j] = imagegrab_start_cam1[0] + (2500*(j+1)) + 2000
 
+    print(np.argwhere(imagegrab_process_time_cam0 > 4.00).flatten())
+    print(len(np.argwhere(imagegrab_process_time_cam0 > 4.00).flatten()))
+    print(imagegrab_process_time_cam0[1896])
+    print(imagegrab_process_time_cam0[1897])
+
     plt.figure(1)
     ax1=plt.gca()
-    #ax1.plot(dif_jaaba_end[:]/1000, '.', alpha=0.3, color='magenta')
-    #print(jaaba_process_time_cam0[0:])
-    #print(jaaba_process_time_cam1[0:])
-    ax1.plot(jaaba_process_time_cam0[:], '.',alpha=0.6,color='red')
-    ax1.plot(jaaba_process_time_cam1[:], '.',alpha=0.6,color='blue')
+    #ax1.plot(dif_jaaba_end[:-1], '.', alpha=0.3, color='magenta')
+    #ax1.plot(jaaba_process_time_cam0[:-1], '.',alpha=0.6,color='red')
+    #ax1.plot(jaaba_process_time_cam1[:-1], '.',alpha=0.6,color='blue')
     #ax1.plot(jaaba2imagegrab_cam0_nidaq_time[:], '.', color='green', alpha=0.5)
     #ax1.plot(jaaba2imagegrab_cam1_nidaq_time[:], '.', color='orange', alpha=0.5)
     #ax1.plot(jaaba2imaggrab_cam0_pc_time[:]/1000, '.', color='green', alpha=0.2)
@@ -235,8 +246,8 @@ def main():
     #ax1.plot(jaaba_pred_curTime1[:] ,'.', color='cyan', alpha=0.5)
     #ax1.plot(jaaba_nidaqThres0[:], '.', alpha=0.5, color='blue')
     #ax1.plot(jaaba_nidaqThres1[:], '.', alpha=0.5, color='red')
-    #ax1.plot(jaaba_nidaqcam0[:-1], '.', alpha=0.1, color='orange')
-    #ax1.plot(jaaba_nidaqcam1[:-1], '.', alpha=0.2, color='green')
+    ax1.plot(jaaba_nidaqcam0[:-1], '.', alpha=0.1, color='orange')
+    ax1.plot(jaaba_nidaqcam1[:-1], '.', alpha=0.2, color='green')
     ax1.plot(np.ones(numFrames)*3)
     #ax1.plot(np.ones(numFrames)*4.0)
     ax1.set_yticks(np.arange(-1,20,1))
@@ -249,18 +260,18 @@ def main():
     plt.figure(2)
     ax2 = plt.gca()
     #ax2.plot(dif_imagegrab[:], '.', color='magenta',alpha=1)
-    #ax2.plot(imagegrab_process_time_cam0[:], '.', color='orange',alpha=0.8)
-    #ax2.plot(imagegrab_process_time_cam1[:], '.', color='green',alpha=0.8)
-    #ax2.plot(imagegrab_start_cam0[:], '.', color='orange', alpha=0.5)
-    #ax2.plot(imagegrab_start_cam1[:], '.', color='green', alpha=0.3)
-    ax2.plot(image_nidaq_cam0[:-1], '.', color='red', alpha=0.5)
-    ax2.plot(image_nidaq_cam1[:-1], '.', color='blue', alpha=0.5)
+    ax2.plot(imagegrab_process_time_cam0[:-1], '.', color='orange',alpha=0.8)
+    ax2.plot(imagegrab_process_time_cam1[:-1], '.', color='green',alpha=0.8)
+    #ax2.plot(imagegrab_start_cam0[:-1]/1000, '.', color='orange', alpha=0.5)
+    #ax2.plot(imagegrab_start_cam1[:-1]/1000, '.', color='green', alpha=0.3)
+    #ax2.plot(image_nidaq_cam0[:-1], '.', color='red', alpha=0.5)
+    #ax2.plot(image_nidaq_cam1[:-1], '.', color='blue', alpha=0.5)
     #ax2.plot(np.ones(numFrames)*3)
     #ax2.plot(np.ones(numFrames)*4)
-    #ax2.plot(image_nidaqThres0[:], '.', color='green', alpha=0.5)
-    #ax2.plot(image_nidaqThres1[:], '.', color='orange', alpha=0.5)
+    #ax2.plot(image_nidaqThres0[:-1], '.', color='green', alpha=0.5)
+    #ax2.plot(image_nidaqThres1[:-1], '.', color='orange', alpha=0.5)
 
-    ax2.set_yticks(np.arange(-1,20,1))
+    #ax2.set_yticks(np.arange(-1,20,1))
     plt.title('Image Grabber latencies video read-thread affinity not set')
     plt.xlabel('Frames')
     plt.ylabel('Imagegrab Latencies in ms')
@@ -269,9 +280,9 @@ def main():
 
     plt.figure()
     ax3 = plt.gca()
-    ax3.plot(cam0_total[:-1], '.', color='green', alpha=0.3)
-    ax3.plot(cam1_total[:-1], '.', color='orange', alpha=0.3)
-    ax3.set_yticks(np.arange(-1,20,1))
+    #ax3.plot(cam0_total[:-1], '.', color='green', alpha=0.3)
+    #ax3.plot(cam1_total[:-1], '.', color='orange', alpha=0.3)
+    #ax3.set_yticks(np.arange(-1,20,1))
     #ax3.plot(abs(cam1_total-cam0_total), color='pink' )
     #ax3.plot(classifier_scr_gt[:], color='cyan',alpha=0.3)
     #plt.title('Comparison of Lift Classifier Score')
