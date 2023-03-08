@@ -6,7 +6,7 @@ import lat_defs as ld
 
 def main():
 
-    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/86b0a_2_15_2023/'
+    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/34448_1_12_2023/'
     no_of_trials = 5
     numFrames = 100000
 
@@ -153,7 +153,7 @@ def main():
     plt.legend(labels, loc='lower right')
     plt.xlabel('Time ms', fontsize=15)
     plt.title('Average Latency of the Behavior Classsifier pipeline', fontsize=20)
-    plt.savefig('C:/Users/27rut/BIAS/misc/janelia_symposium_figures/avg_latency_plot.jpg')
+    #plt.savefig('C:/Users/27rut/BIAS/misc/janelia_symposium_figures/avg_latency_plot.jpg')
 
     plt.figure(figsize=(15, 8))
     ax2=plt.gca()
@@ -197,7 +197,7 @@ def main():
     plt.xlabel('Time ms',fontsize=20)
     plt.ylabel('Percentiles',fontsize=20)
     plt.title('Percentile of Latency Distribution Behavior Classifier Pipeline',fontsize=24)
-    plt.savefig('C:/Users/27rut/BIAS/misc/janelia_symposium_figures/percentile_latency_plot.jpg')
+    #plt.savefig('C:/Users/27rut/BIAS/misc/janelia_symposium_figures/percentile_latency_plot.jpg')
 
     plt.show()
 

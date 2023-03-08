@@ -15,10 +15,10 @@ def not_intersection(lst1, lst2):
 
 def main():
 
-    output_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/55d41_2_21_2023/'
+    output_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/039d7_2_27_2023/'
     output_dir_gt = 'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores_new/'
     trial_type = '1'
-    no_of_trials = 3
+    no_of_trials = 1
     numFrames = 2498
 
     imagegrab_skipped_frames_cam0 = 'imagegrab_skipped_framescam0_short_trial'
@@ -79,7 +79,7 @@ def main():
         side_skip_imagegrab_gt.append(np.argwhere(skips_side_gt[i]==1000).flatten())
         front_skip_imagegrab_gt.append(np.argwhere(skips_front_gt[i]==1000).flatten())
 
-        indexes = np.arange(1,numFrames,1)
+        indexes = np.arange(1,numFrames-1,1)
         front_scores = np.zeros(numFrames)
         side_scores = np.zeros(numFrames)
         combined_scores  = np.zeros(numFrames)
@@ -92,11 +92,11 @@ def main():
         not_correct_frames = not_intersection(np.arange(1,numFrames-1), correct_frames[i])
 
         front_scores[not_front_skips] = 0
-        front_scores = front_scores[1:]
+        front_scores = front_scores[1:-1]
         side_scores[not_side_skips] = 0
-        side_scores = side_scores[1:]
+        side_scores = side_scores[1:-1]
         combined_scores[not_correct_frames] = 0
-        combined_scores = combined_scores[1:]
+        combined_scores = combined_scores[1:-1]
 
         side_imagegrab = np.zeros(numFrames)
         front_imagegrab = np.zeros(numFrames)
@@ -112,9 +112,9 @@ def main():
         combined_imagegrab[side_skip_imagegrab_gt[i]] = 0.0
         front_imagegrab[not_front_skip_imagegrab] = 0.0
         side_imagegrab[not_side_skip_imagegrab] = 0.0
-        side_imagegrab = side_imagegrab[1:]
-        front_imagegrab = front_imagegrab[1:]
-        combined_imagegrab = combined_imagegrab[1:]
+        side_imagegrab = side_imagegrab[1:-1]
+        front_imagegrab = front_imagegrab[1:-1]
+        combined_imagegrab = combined_imagegrab[1:-1]
         print(front_skip_imagegrab_gt[i])
 
         '''plt.figure(figsize=(30, 10))
@@ -138,27 +138,22 @@ def main():
                 scalar=0.0
             prev_txt = txt
             ax1.annotate(txt, xy=(indexes[txt]+20, front_imagegrab[txt]+(i*scalar)),fontsize=16) #xytext=(indexes[txt]+1, front_imagegrab[txt]+1))
-        plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/random_intervals_front_skip_video_delay1800.jpg')'''
+        plt.savefig('C:/Users/27rut/BIAS/misc/jab_plugin_day_trials/figs/random_intervals_front_skip_video_delay1800.jpg')'''
 
-        plt.figure(figsize=(30,10))
+        plt.figure(figsize=(30,30))
         ax2 = plt.gca()
-        ax2.bar(list(indexes), list(combined_imagegrab), width=0.40 ,color='green',alpha=0.4, align='center',zorder=0)
-        ax2.bar(list(indexes), list(side_imagegrab), width=2, color='red', alpha=1, align='center',
-                 zorder=0)
-        ax2.bar(list(indexes), list(front_imagegrab), width=2, color='blue', alpha=1, align='center',
-                 zorder=0)
-        plt.xticks(np.arange(1, numFrames, 100), fontsize=16)
-        ax2.axes.get_yaxis().set_ticks([])
-        #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/random_intervals_front_skip_video_delay1800_gt.jpg')
+        ax2.bar(list(indexes), list(combined_imagegrab), width=0.40 ,color='green',alpha=0.4, align='center')
+        ax2.bar(list(indexes), list(side_imagegrab), width=2, color='red', alpha=1, align='center')
+        ax2.bar(list(indexes), list(front_imagegrab), width=2, color='blue', alpha=1, align='center')
 
-        plt.figure(figsize=(30, 10))
-        ax3 = plt.gca()
-        ax3.bar(list(indexes), list(combined_scores), width=0.4, color='green', alpha=0.4, align='center',zorder=1)
-        ax3.bar(list(indexes), list(front_scores), width=2, color='blue', alpha=1, align='center')
-        ax3.bar(list(indexes), list(side_scores), width=2, color='red', alpha=1, align='center')
-        plt.xticks(np.arange(1, numFrames, 100), fontsize=16)
-        ax3.axes.get_yaxis().set_ticks([])
-        #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/random_intervals_front_skip_video_delay1800_scr.jpg')
+        ax2_new = ax2.twinx().twiny()
+        ax2_new.barh(list(indexes), list(combined_scores), height=0.4, color='green', alpha=0.4, align='center')
+        ax2_new.barh(list(indexes), list(front_scores), height=3, color='blue', alpha=1, align='center')
+        ax2_new.barh(list(indexes), list(side_scores), height=3, color='red', alpha=1, align='center')
+        plt.title('Match skipped frames at imagegrab to frames skipped at scores scollection', fontsize=40, pad=20)
+        ax2.tick_params(axis='both', which='major', labelsize=40)
+        ax2_new.tick_params(axis='both', which='major', labelsize=40)
+        #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/random_intervals_side-front_skip_video_delay1800_scr.jpg')
 
         plt.show()
 

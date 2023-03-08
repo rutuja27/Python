@@ -55,13 +55,14 @@ def readcsvFile_nidaq(filename, arr_cam, arr_lat):
             arr_lat[frm_id] = (float(row[1])*0.02)
             frm_id += 1
 
-def readcsvFile_int(filename, arr, scaling_factor):
+def readcsvFile_int(filename, arr, scaling_factor, row_id):
 
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 
     for idx, row in enumerate(data_grab):
-        arr[idx] = np.int(row[0])/scaling_factor
+        arr[idx] = np.int(row[row_id])/scaling_factor
+
     fhandle.close()
 
 

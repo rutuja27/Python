@@ -174,8 +174,15 @@ def plot_histogram(arr, plt_handle):
     count = count / sum(count)
     plt.bar(bins, count, width=0.4)
 
-def plot_bar(arr_keys,arr_vals1, arr_vals2, color, alpha, width, scalar_shift, label, ax_handle):
+def concatenate_barplot(arr_keys,arr_vals1, arr_vals2, color, alpha, width, scalar_shift, label, ax_handle):
 
      pp1 =ax_handle.bar(arr_keys + (scalar_shift * width), arr_vals1,color=color, width=width, label=label[0])
      pp2 = ax_handle.bar(arr_keys+(scalar_shift*width), arr_vals2, bottom=arr_vals1, color=color,alpha=0.1, width=width, label=label[1])
      return pp2
+
+def plot_bar(scr, scr_gt, ax_handle):
+
+    indexes = np.arange(0,len(scr_gt))
+    scr_diff = scr_gt-scr
+    bx = ax_handle.bar(list(indexes), scr_diff , width=6, color='blue', alpha=0.5, align='center')
+    return bx

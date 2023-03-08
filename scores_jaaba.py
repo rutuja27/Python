@@ -79,7 +79,7 @@ def main():
 
 
     ## predicted from bias jaaba
-    bias_pred_file = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/c1a39_2_21_2023/classifier_trial2.csv';
+    bias_pred_file = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/classifier_trial1.csv';
 
     bias_pred = pd.read_csv(bias_pred_file)
     bias_pred_ts = bias_pred['Score ts']
@@ -96,16 +96,33 @@ def main():
     match_scores(bias_pred_scores, demo_pred_scores)
     #readScore_ts(bias_pred_ts[140:-1])
 
+    '''file = 'C:/Users/Public/Documents/National Instruments/NI-DAQ/Examples/DAQmx ANSI C/Counter/Count Digital Events/' \
+           'Cnt-Buf-Cont-ExtClk/x64/Release/latency.csv'
+    file_handle = open(file, 'r+');
+    lat_read = csv.reader(file_handle, delimiter=',')
+    delay_test_nidaq = []
+
+    for idx,row in enumerate(lat_read):
+        delay_test_nidaq.append(float(row[0]))
+    file_handle.close()
+
+    plt.plot(delay_test_nidaq[0:40], '.')
+    plt.show()'''
+
     #plt.plot(demo_pred_scores[:],color='b', alpha=0.3)
     #plt.plot(bias_pred_scores[:-1], color='r', alpha=0.3)
+    plt.figure(figsize=(10, 10))
     plt.plot(demo_pred_scores[:], bias_pred_scores[:],'.')
 
-    plt.title('Lift Classifier Prediction')
-    plt.xlabel('JAABA Offline Classifier Prediction Score')
-    plt.ylabel('BIAS JAABA Classifier Prediction Score')
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.title('Lift Classifier Prediction',fontsize=20)
+    plt.xlabel('JAABA Offline Classifier Prediction Score', fontsize=18)
+    plt.ylabel('BIAS JAABA Classifier Prediction Score', fontsize=18)
+
     #plt.legend(['JAABA Offline Classifier Prediction', 'BIAS JAABA Classifier Prediction'], fontsize=8)
     #plt.savefig('C:/Users/27rut/OneDrive/Pictures/cvml 2022/lift_classifier_scores.pdf')
-    #plt.savefig('C:/Users/27rut/OneDrive/Pictures/cvml 2022/correlation_scores.jpg')
+    plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/correlation_scores.jpg')
     plt.show()
 
 if __name__ == "__main__":
