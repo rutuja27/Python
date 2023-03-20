@@ -25,7 +25,7 @@ def match_scores(arr1, arr2):
                 continue
             else:
                 cnt_mismatch += 1
-                print(scr1,scr2)
+
         idx+=1
     print("Number of matching scores" ,count, cnt_mismatch)
 
@@ -69,7 +69,7 @@ def main():
     #     data = list(f[a_group_key])
     # data = data[0][0:2497]
 
-    demo_file = 'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores_new/lift_classifier.csv';
+    demo_file = 'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores/lift_classifier.csv';
     demo_handle = open(demo_file, 'r+');
     demo_pred = csv.reader(demo_handle, delimiter=',')
     demo_pred_scores = []
@@ -112,7 +112,7 @@ def main():
     #plt.plot(demo_pred_scores[:],color='b', alpha=0.3)
     #plt.plot(bias_pred_scores[:-1], color='r', alpha=0.3)
     plt.figure(figsize=(10, 10))
-    plt.plot(demo_pred_scores[:], bias_pred_scores[:],'.')
+    plt.plot(bias_pred_scores[1:], demo_pred_scores[:-1],'.')
 
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
@@ -122,7 +122,7 @@ def main():
 
     #plt.legend(['JAABA Offline Classifier Prediction', 'BIAS JAABA Classifier Prediction'], fontsize=8)
     #plt.savefig('C:/Users/27rut/OneDrive/Pictures/cvml 2022/lift_classifier_scores.pdf')
-    plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/correlation_scores.jpg')
+    #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/correlation_scores.jpg')
     plt.show()
 
 if __name__ == "__main__":

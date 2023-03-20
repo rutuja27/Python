@@ -74,7 +74,7 @@ def main():
 #files
     filepath = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/'
 
-    trial_type = '2'
+    trial_type = '5'
     numCameras=2
 
     imagegrab_file_cam0 = filepath + 'imagegrab_start_timecam0_short_trial' + trial_type + '.csv'
@@ -176,8 +176,8 @@ def main():
     ut.readcsvFile_int(img_skipped_cam0, imagegrab_skipped_cam0,1,0)
     ut.readcsvFile_int(img_skipped_cam1, imagegrab_skipped_cam1,1,0)
 
-    #ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, 1000)
-    #ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, 1000)
+    ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, 1000,0)
+    ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, 1000,0)
     #ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0, 1)
     #ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1, 1)
     #ut.readcsvFile_int(jaaba_endfile_cam0, jaaba_end_cam0, 1000)
@@ -230,8 +230,8 @@ def main():
     plt.figure(1)
     ax1=plt.gca()
     #ax1.plot(dif_jaaba_end[:-1], '.', alpha=0.3, color='magenta')
-    #ax1.plot(jaaba_process_time_cam0[:-1], '.',alpha=0.6,color='red')
-    #ax1.plot(jaaba_process_time_cam1[:-1], '.',alpha=0.6,color='blue')
+    ax1.plot(jaaba_process_time_cam0[:-1], '.',alpha=0.6,color='red')
+    ax1.plot(jaaba_process_time_cam1[:-1], '.',alpha=0.6,color='blue')
     #ax1.plot(jaaba2imagegrab_cam0_nidaq_time[:], '.', color='green', alpha=0.5)
     #ax1.plot(jaaba2imagegrab_cam1_nidaq_time[:], '.', color='orange', alpha=0.5)
     #ax1.plot(jaaba2imaggrab_cam0_pc_time[:]/1000, '.', color='green', alpha=0.2)
@@ -245,7 +245,7 @@ def main():
     #ax1.plot(jaaba_nidaqThres1[:], '.', alpha=0.5, color='red')
     #ax1.plot(jaaba_nidaqcam0[:-1], '.', alpha=0.1, color='orange')
     #ax1.plot(jaaba_nidaqcam1[:-1], '.', alpha=0.2, color='green')
-    ax1.plot(np.ones(numFrames)*3)
+    #ax1.plot(np.ones(numFrames)*3)
     #ax1.plot(np.ones(numFrames)*4.0)
     ax1.set_yticks(np.arange(-1,20,1))
     plt.title('BIAS JAABA processing time from video')
@@ -261,14 +261,14 @@ def main():
     #print('model',imagegrab_start_cam0[0:-1]-imagegrab_process_time_cam0[1:])
     #ax2.plot(dif_imagegrab[:], '.', color='magenta',alpha=1)
     #ax2.plot(image_end_time_cam0[1:]-image_end_time_cam0[0:-1] , '.', color='green', alpha=0.8)
-    #ax2.plot((image_end_time_cam0[:]-imagegrab_start_cam0[:])/1000 , '.', color='orange',alpha=0.8)
-    #ax2.plot((image_end_time_cam1[:]-imagegrab_start_cam1[:])/1000, '.', color='green',alpha=0.8)
-    #ax2.plot(imagegrab_start_cam1[1:], '.', color='green',alpha=0.8)
+    #ax2.plot((image_end_time_cam0[:-1]-imagegrab_start_cam0[:-1])/1000 , '.', color='orange',alpha=0.8)
+    #ax2.plot((image_end_time_cam1[:-1]-imagegrab_start_cam1[:-1])/1000, '.', color='green',alpha=0.8)
+    #ax2.plot(imagegrab_start_cam1[:-1], '.', color='green',alpha=0.8)
     #ax2.plot(abs(imagegrab_process_time_cam0[:]), '.', color='orange',alpha=0.8)
     #ax2.plot(abs(imagegrab_process_time_cam1[:] ), '.', color='green',alpha=0.8)
-    ax2.plot(abs(imagegrab_process_time_cam1[0:-1]-imagegrab_process_time_cam0[0:-1])/1000,'.', color='blue', alpha=0.2)
-    #ax2.plot(imagegrab_start_cam0[:]/1000, '.', color='red', alpha=0.5)
-    ##ax2.plot(imagegrab_start_cam1[:]/1000, '.', color='blue', alpha=0.3)
+    ax2.plot((imagegrab_process_time_cam1[:-1]-imagegrab_process_time_cam0[:-1])/1000,'.', color='blue', alpha=0.2)
+    #ax2.plot(imagegrab_start_cam1[:]/1000 - imagegrab_start_cam0[:]/1000, '.', color='red', alpha=0.5)
+    #ax2.plot(imagegrab_start_cam1[:]/1000, '.', color='blue', alpha=0.3)
     #ax2.plot(image_nidaq_cam0[:-1], '.', color='red', alpha=0.5)
     #ax2.plot(image_nidaq_cam1[:-1], '.', color='blue', alpha=0.5)
     #ax2.plot(np.ones(numFrames)*3)
@@ -279,13 +279,13 @@ def main():
     #ax2.plot(imagegrab_skipped_cam1[:], '.', color='blue', alpha=0.5)
 
     #ax2.set_yticks(np.arange(-1,20,1))
-    plt.title('Image Grabber latencies video read-thread affinity not set')
+    plt.title('Image Grabber latencies video read')
     plt.xlabel('Frames')
     plt.ylabel('Imagegrab Latencies in ms')
     plt.legend(['Cam 0' , 'Cam 1'], fontsize=8)
     #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/biasjaaba_imagegrablat_vid_woskip_no_preview_nojaaba_noimagedispatch_noupdateDisplay_multicamera_thread_affinityOG.jpg')
 
-    plt.figure()
+    '''plt.figure()
     ax3 = plt.gca()
     #ax3.plot(cam0_total[:-1], '.', color='green', alpha=0.3)
     #ax3.plot(cam1_total[:-1], '.', color='orange', alpha=0.3)
@@ -301,7 +301,7 @@ def main():
     plt.figure()
     ax4 = plt.gca()
     ax4.plot(total_lat[:],'.')
-    ax4.plot(np.ones(numFrames)*5)
+    ax4.plot(np.ones(numFrames)*5)'''
     plt.show()
 
 if __name__ == "__main__":
