@@ -249,6 +249,14 @@ def readScoreData(filename, scr_obj, flag_gt):
                     scr_obj.frameCount[idx - 1] = np.int(row[4])
                     scr_obj.view[idx -1 ] = np.int(row[5])
 
+def readArray(filename, arr, index):
+
+    with open(filename, 'r', newline='') as f:
+        config_reader = csv.reader(f, delimiter=',')
+        for idx, row in enumerate(config_reader):
+            arr.append(np.float(row[index]))
+
+    f.close()
 
 
 

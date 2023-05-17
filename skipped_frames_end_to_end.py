@@ -80,7 +80,7 @@ def match_scores(scr_ind_front, scr_ind_side, scr, scr_side_gt, scr_front_gt, sc
 
 def main():
 
-    output_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/'
+    output_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/ce521_3_20_2023/'
     output_dir_gt = 'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores/'
     trial_type = '1'
     no_of_trials = 5
@@ -123,23 +123,25 @@ def main():
     scores_side_gt = np.array(no_of_trials * [numFrames * [0.0]])
     scores_front_gt = np.array(no_of_trials * [numFrames * [0.0]])
 
-    front_skips = []
-    side_skips = []
-    imagegrab_side_skips_gt = []
-    imagegrab_front_skips_gt = []
-    imagegrab_side_skips = []
-    imagegrab_front_skips = []
+    front_skips = []              ## indexes of frames skipped in front in processScores thread
+    side_skips = []               ## indexes of frames skipped in side in processScores thread
+    imagegrab_side_skips_gt = []  ## indexes of frames skipped in imagegrab thread-side by user
+    imagegrab_front_skips_gt = [] ## indexes of frames skipped in imagegrab thread-front by user
+    imagegrab_side_skips = []     ## indexes of frames actually skipped in imagegrab thread-side
+    imagegrab_front_skips = []    ## indexes of frames actually skipped in imagegrab thread-front
     jaaba_side_skips = []
     jaaba_front_skips = []
-    both_skips = []
-    skips_process_front = []
-    skips_process_side = []
-    correct_frames = []
+    both_skips = []               ## indexes of frames skipped in both views in processScores thread
+    skips_process_front = []      ## indexes of frames skipped only because of compute-front
+    skips_process_side = []       ## indexes of frames skipped only because of compute-side
+    correct_frames = []           ## indexes of frames with correct scores
     zero_ind = []
-    only_imagegrab_side = []
-    only_imagegrab_front = []
-    both_skips_grab = []
-    both_skips_compute = []
+    only_imagegrab_side = []      ##  # only frames skipped at
+                                  ## imagergab with no frames skipped in both views
+    only_imagegrab_front = []     ##  # only frames skipped at
+                                  ## imagergab with no frames skipped in both views
+    both_skips_grab = []          # skipped at grab in both views
+    both_skips_compute = []       #skipped in both views at jaaba compute
 
     for i in range(0,no_of_trials):
         trial_type = str(i+1)
@@ -183,10 +185,7 @@ def main():
         jaaba_front_skips.append(np.argwhere(nidaq_thres_jaaba_cam1[i]==1).flatten())
         imagegrab_side_skips.append(np.argwhere(nidaq_thres_imagegrab_cam0[i]==1).flatten())
         imagegrab_front_skips.append(np.argwhere(nidaq_thres_imagegrab_cam1[i]==1).flatten())
-        '''if(len(imagegrab_front_skips[i]) != 0):
-            imagegrab_front_skips[i] = imagegrab_front_skips[i][:-1]
-        if(len(imagegrab_side_skips[i]) != 0):
-            imagegrab_side_skips[i] = imagegrab_side_skips[i][:-1]'''
+
         imagegrab_side_skips_gt.append(np.argwhere(skips_side_gt[i]==1).flatten())
         imagegrab_front_skips_gt.append(np.argwhere(skips_front_gt[i]==1).flatten())
 
@@ -226,8 +225,11 @@ def main():
                 print('Present in gt but not in test for side', nomatch_in_test_sde)
                 print('Present in test but not in gt for side', nomatch_in_gt_sde)
 
-                # matching_frames(np.sort(not_intersection(intersection(side_skips[i], \
-                #                                             imagegrab_side_skips[i]), both_skips_grab[i])),imagegrab_side_skips[i])
+                nomatch_in_processScores , nomatch_in_imagegrab = matching_frames(np.sort(not_intersection(intersection(side_skips[i], \
+                                                             imagegrab_side_skips[i]), both_skips_grab[i])),imagegrab_side_skips[i])
+
+                print('Present in imagegrab not in processScores', nomatch_in_processScores)
+                print('Present in processScores not in imagegrab', nomatch_in_imagegrab)
 
                 if ((len(side_skips[i]) - len(only_imagegrab_side[i])) == len(skips_process_side[i])):
                     print('Frames skipped in side at imagegrab match ones in process Scores')
@@ -289,7 +291,6 @@ def main():
         ax1.plot(mag_skips_side_gt[i], '.',color='red')
         ax1.plot(mag_skips_front_gt[i], '.', color='blue')
         plt.show()
-
 
         '''fig2, ax2 = plt.subplots(no_of_skips_view1, figsize=(15,15))
         scr_gt_diff = np.array(numFrames * [0.0])

@@ -11,23 +11,25 @@ import matplotlib.pyplot as plt
 import csv
 import itertools
 import pandas as pd
+import utils as ut
 
-def match_scores(arr1, arr2):
+def match_scores(arr1, arr2, view):
 
     count=0
     idx=0
     cnt_mismatch=0
+    cnt_skipped=0
     for (scr1, scr2) in zip(arr1,arr2):
-        if round(scr1,3) == round(scr2,3):
+
+        if round(scr1,4) == round(scr2,4):
             count +=1
         else:
-            if(round(scr1,3)==0 or round(scr2,3) ==0):
-                continue
+            if view[idx] == 1 or view[idx]==2:
+                cnt_skipped += 1
             else:
-                cnt_mismatch += 1
-
+                cnt_mismatch+=1
         idx+=1
-    print("Number of matching scores" ,count, cnt_mismatch)
+    print("Number of matching scores" ,count,cnt_skipped, cnt_mismatch)
 
 def readScore_ts(arr1):
 
@@ -44,57 +46,35 @@ def readScore_ts(arr1):
 
 def main():
 
-    #3 this does not match the demo classifier because if read funtion diff betwn opencv and matlab
+    # this does not match the demo classifier because if read funtion diff betwn opencv and matlab
     ## gndtruth data
-    scores = loadmat('C:/Users/27rut/BIAS/misc/classifier_trials/gnd_truth/scores_Liftm134w.mat')
+    scores = loadmat('Y:\hantman_data\jab_experiments\STA14\STA14\\20230503\STA14_20230503_142341\scores_Handopen.mat')
     gnd_scores = np.array(scores['allScores']['scores'][0][0])
-    print(gnd_scores[0][0])
-    #plt.plot(gnd_scores[0][0])
-
-
-    #mulclass = h5py.File('C:/Users/27rut/BIAS/BIASJAABA/src/plugin/jaaba_plugin/json_files/multiclassifier.mat','r+')
-    #class_Lift = mulclass['Lift']
-    #print(class_Lift['dir'])
-    #lift_mat = h5py.File('C:/Users/27rut/BIAS/BIASJAABA/src/plugin/jaaba_plugin/json_files/classifier_Lift.mat','r+')
-    #plt.plot(class_Lift['dim'],lift_mat['dim'])
-
-
-    # # predicted from jaaba demo code
-    # filename = 'C:/Users/27rut/BIAS/build/Release/test_Lift.h5';
-    # with h5py.File(filename, "r") as f:
-    #     # List all groups
-    #     a_group_key = list(f.keys())[0]
-
-    #     # Get the data
-    #     data = list(f[a_group_key])
-    # data = data[0][0:2497]
+    numFrames = len(gnd_scores[0][0][0][:-1])
+    print(gnd_scores[0][0][0])
 
     demo_file = 'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores/lift_classifier.csv';
-    demo_handle = open(demo_file, 'r+');
-    demo_pred = csv.reader(demo_handle, delimiter=',')
-    demo_pred_scores = []
-    for idx,row in enumerate(demo_pred):
-        demo_pred_scores.append(float(row[1]))
-    demo_handle.close()
-
+    demo_pred_scores = np.array(numFrames * [0.0], dtype=np.double)
+    ut.read_score(demo_file,demo_pred_scores,1,1)
 
     ## predicted from bias jaaba
-    bias_pred_file = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/classifier_trial1.csv';
+    bias_pred_file = 'Y:/hantman_data/jab_experiments/STA14/STA14/20230503/STA14_20230503_142341/classifier_score.csv';
+    bias_pred_scores = np.array(numFrames*[0.0],dtype=np.double)
+    bias_pred_view = np.array(numFrames*[0.0], dtype=np.double)
+    ut.read_score(bias_pred_file,bias_pred_scores,0,4)
+    #ut.read_score(bias_pred_file,bias_pred_view,0,10)
 
-    bias_pred = pd.read_csv(bias_pred_file)
-    bias_pred_ts = bias_pred['Score ts']
+    scr_diff = (abs(gnd_scores[0][0][0][:-1] - bias_pred_scores[:]))
+    sort_diff = np.sort(scr_diff)
+    reverse_sort_diff = sort_diff[::-1]  ##numpy does not sort in descending order
+    sort_indexes = np.argsort(scr_diff)
+    reverse_sort_indexes = sort_indexes[::-1];
 
-    bias_pred_scores = []
-    bias_pred_handle = open(bias_pred_file, 'r+');
-    bias_pred_scrhd = csv.reader(bias_pred_handle, delimiter=',')
-    for idx,row in enumerate(bias_pred_scrhd):
-        if(idx==0):
-           continue
-        bias_pred_scores.append(float(row[3]))
-    bias_pred_handle.close()
+    print('Score', gnd_scores[0][0][0][1113], bias_pred_scores[1113])
+    print('Score diff',reverse_sort_diff[0:10])
+    print('Scores indexes',reverse_sort_indexes[0:10])
 
-    match_scores(bias_pred_scores, demo_pred_scores)
-    #readScore_ts(bias_pred_ts[140:-1])
+    match_scores(bias_pred_scores[:], gnd_scores[0][0][0][:-1],bias_pred_view)
 
     '''file = 'C:/Users/Public/Documents/National Instruments/NI-DAQ/Examples/DAQmx ANSI C/Counter/Count Digital Events/' \
            'Cnt-Buf-Cont-ExtClk/x64/Release/latency.csv'
@@ -109,17 +89,18 @@ def main():
     plt.plot(delay_test_nidaq[0:40], '.')
     plt.show()'''
 
-    #plt.plot(demo_pred_scores[:],color='b', alpha=0.3)
-    #plt.plot(bias_pred_scores[:-1], color='r', alpha=0.3)
-    plt.figure(figsize=(10, 10))
-    plt.plot(bias_pred_scores[1:], demo_pred_scores[:-1],'.')
+    #plt.plot(demo_pred_scores[:-1],'.',color='b', alpha=0.3)
+    #plt.plot(gnd_scores[0][0][0][1:-1], '.', color='b')
+    #plt.plot(bias_pred_scores[1:], '.', color='r', alpha=0.3)
+    #plt.figure(figsize=(10, 10))
+    #plt.plot(bias_pred_scores[1:], demo_pred_scores[:-1],'.')
+    plt.plot(bias_pred_scores[1:], gnd_scores[0][0][0][1:-1], '.')
 
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.title('Lift Classifier Prediction',fontsize=20)
-    plt.xlabel('JAABA Offline Classifier Prediction Score', fontsize=18)
+    plt.xlabel('Matlab JAABA Classifier Prediction Score', fontsize=18)
     plt.ylabel('BIAS JAABA Classifier Prediction Score', fontsize=18)
-
     #plt.legend(['JAABA Offline Classifier Prediction', 'BIAS JAABA Classifier Prediction'], fontsize=8)
     #plt.savefig('C:/Users/27rut/OneDrive/Pictures/cvml 2022/lift_classifier_scores.pdf')
     #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/correlation_scores.jpg')

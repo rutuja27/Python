@@ -74,9 +74,14 @@ def main():
 #files
     filepath = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/'
 
-    trial_type = '5'
+    trial_type = '1'
     numCameras=2
+    isVideo=0
 
+    if isVideo:
+        numFrames = 2498
+    else:
+        numFrames = 100000
     imagegrab_file_cam0 = filepath + 'imagegrab_start_timecam0_short_trial' + trial_type + '.csv'
     img_proc_cam0 = filepath + 'imagegrab_process_timecam0_short_trial' + trial_type + '.csv'
     img_skipped_cam0 = filepath + 'imagegrab_skipped_framescam0_short_trial' + trial_type + '.csv'
@@ -111,7 +116,7 @@ def main():
     classifier_scr_front_file = filepath + 'classifier_scr_front' + trial_type + '.csv'
     classifier_scr_file_gt = filepath + 'lift_classifier.csv'#'C:/Users/27rut/BIAS/misc/classifier_trials/classifier_scores_new/lift_classifier_side.csv'
 
-    numFrames = 2498
+
     imagegrab_process_time_cam0 = np.array(numFrames*[0.0])
     imagegrab_process_time_cam1 = np.array(numFrames * [0.0])
     imagegrab_start_cam0 = np.array(numFrames * [0.0])
@@ -159,7 +164,7 @@ def main():
     ut.readcsvFile_nidaq(imagegrab_nidaq_cam0, image_nidaq_camtrig0, image_nidaq_cam0)
     ut.readcsvFile_int(image_nidaqThres_cam0, image_nidaqThres0,1,0)
     ut.readcsvFile_int(img_end_time_cam0, image_end_time_cam0,1,0)
-    #ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0)
+    ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0)
     #ut.readcsvFile_int(jaaba_nidaqThres_cam0, jaaba_nidaqThres0,1)
     #ut.readcsvFile_int(jaaba_curTimecam0_file, jaaba_curTimecam0,1)
 
@@ -169,15 +174,15 @@ def main():
       ut.readcsvFile_int(img_end_time_cam1, image_end_time_cam1, 1,0)
       ut.readcsvFile_nidaq(imagegrab_nidaq_cam1, image_nidaq_camtrig1, image_nidaq_cam1)
       ut.readcsvFile_int(image_nidaqThres_cam1, image_nidaqThres1, 1,0)
-      #ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1)
+      ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1)
       #ut.readcsvFile_int(jaaba_nidaqThres_cam1, jaaba_nidaqThres1 ,1)
       #ut.readcsvFile_int(jaaba_curTimecam1_file, jaaba_curTimecam1, 1)
 
-    ut.readcsvFile_int(img_skipped_cam0, imagegrab_skipped_cam0,1,0)
-    ut.readcsvFile_int(img_skipped_cam1, imagegrab_skipped_cam1,1,0)
+    #ut.readcsvFile_int(img_skipped_cam0, imagegrab_skipped_cam0,1,0)
+    #ut.readcsvFile_int(img_skipped_cam1, imagegrab_skipped_cam1,1,0)
 
-    ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, 1000,0)
-    ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, 1000,0)
+    #ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, 1000,0)
+    #ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, 1000,0)
     #ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0, 1)
     #ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1, 1)
     #ut.readcsvFile_int(jaaba_endfile_cam0, jaaba_end_cam0, 1000)
@@ -186,7 +191,7 @@ def main():
     ## read ts from score files
     #ut.read_score(classifier_scr_file, classifier_side_scr_ts, 0, 1)
     #ut.read_score(classifier_scr_file, classifier_front_scr_ts, 0, 2)
-    #ut.read_score(classifier_scr_file, classifier_scr_ts, 0, 0)
+    ut.read_score(classifier_scr_file, classifier_scr_ts, 0, 0)
 
     image_nidaq_cam0 = image_nidaq_cam0 - image_nidaq_camtrig0
     image_nidaq_cam1 = image_nidaq_cam1 - image_nidaq_camtrig0
@@ -212,11 +217,14 @@ def main():
     cam0_total = (jaaba_end_cam0 - imagegrab_start_cam0)/1000
     cam1_total = (jaaba_end_cam1 - imagegrab_start_cam1)/1000
 
-    #total_lat = (classifier_scr_ts[:-1]*0.02 - image_nidaq_camtrig0[1:-1])
-    print(np.minimum(imagegrab_start_cam1[1:-1]/1000,imagegrab_start_cam0[1:-1]/1000))
-    total_lat = (classifier_scr_ts[:-1]/1000) - np.minimum(imagegrab_start_cam1[1:-1]/1000,imagegrab_start_cam0[1:-1]/1000)
-    total_lat[total_lat < 0] = 0
-    print('Skipped in both views' ,np.argwhere(total_lat < 0))
+    if not isVideo:
+        total_lat = (classifier_scr_ts[:-1]*0.02 - image_nidaq_camtrig0[1:-1])
+        total_lat[total_lat < 0] = 0
+    else:
+        total_lat = (classifier_scr_ts[1:]/1000) - np.minimum(imagegrab_start_cam1[1:-1]/1000,imagegrab_start_cam0[1:-1]/1000)
+        total_lat[total_lat < 0] = 0
+        print('Skipped in both views' ,np.argwhere(total_lat < 0))
+
     print(np.sum(total_lat)/(numFrames-1))
     print(np.sum(total_lat > 6))
 
@@ -230,8 +238,8 @@ def main():
     plt.figure(1)
     ax1=plt.gca()
     #ax1.plot(dif_jaaba_end[:-1], '.', alpha=0.3, color='magenta')
-    ax1.plot(jaaba_process_time_cam0[:-1], '.',alpha=0.6,color='red')
-    ax1.plot(jaaba_process_time_cam1[:-1], '.',alpha=0.6,color='blue')
+    #ax1.plot(jaaba_process_time_cam0[:-1], '.',alpha=0.6,color='red')
+    #ax1.plot(jaaba_process_time_cam1[:-1], '.',alpha=0.6,color='blue')
     #ax1.plot(jaaba2imagegrab_cam0_nidaq_time[:], '.', color='green', alpha=0.5)
     #ax1.plot(jaaba2imagegrab_cam1_nidaq_time[:], '.', color='orange', alpha=0.5)
     #ax1.plot(jaaba2imaggrab_cam0_pc_time[:]/1000, '.', color='green', alpha=0.2)
@@ -243,8 +251,8 @@ def main():
     #ax1.plot(jaaba_pred_curTime1[:] ,'.', color='cyan', alpha=0.5)
     #ax1.plot(jaaba_nidaqThres0[:], '.', alpha=0.5, color='blue')
     #ax1.plot(jaaba_nidaqThres1[:], '.', alpha=0.5, color='red')
-    #ax1.plot(jaaba_nidaqcam0[:-1], '.', alpha=0.1, color='orange')
-    #ax1.plot(jaaba_nidaqcam1[:-1], '.', alpha=0.2, color='green')
+    ax1.plot(jaaba_nidaqcam0[:-1], '.', alpha=0.1, color='orange')
+    ax1.plot(jaaba_nidaqcam1[:-1], '.', alpha=0.2, color='green')
     #ax1.plot(np.ones(numFrames)*3)
     #ax1.plot(np.ones(numFrames)*4.0)
     ax1.set_yticks(np.arange(-1,20,1))
@@ -263,11 +271,12 @@ def main():
     #ax2.plot(image_end_time_cam0[1:]-image_end_time_cam0[0:-1] , '.', color='green', alpha=0.8)
     #ax2.plot((image_end_time_cam0[:-1]-imagegrab_start_cam0[:-1])/1000 , '.', color='orange',alpha=0.8)
     #ax2.plot((image_end_time_cam1[:-1]-imagegrab_start_cam1[:-1])/1000, '.', color='green',alpha=0.8)
-    #ax2.plot(imagegrab_start_cam1[:-1], '.', color='green',alpha=0.8)
-    #ax2.plot(abs(imagegrab_process_time_cam0[:]), '.', color='orange',alpha=0.8)
-    #ax2.plot(abs(imagegrab_process_time_cam1[:] ), '.', color='green',alpha=0.8)
-    ax2.plot((imagegrab_process_time_cam1[:-1]-imagegrab_process_time_cam0[:-1])/1000,'.', color='blue', alpha=0.2)
-    #ax2.plot(imagegrab_start_cam1[:]/1000 - imagegrab_start_cam0[:]/1000, '.', color='red', alpha=0.5)
+    #ax2.plot(imagegrab_start_cam0[1:]-imagegrab_start_cam0[0:-1], '.', color='red',alpha=0.8)
+    #ax2.plot(imagegrab_start_cam1[1:]-imagegrab_start_cam1[0:-1], '.', color='green',alpha=0.8)
+    ax2.plot(abs(imagegrab_process_time_cam0[:]), '.', color='orange',alpha=0.8)
+    ax2.plot(abs(imagegrab_process_time_cam1[:] ), '.', color='yellow',alpha=0.8)
+    #ax2.plot((imagegrab_process_time_cam1[:-1]-imagegrab_process_time_cam0[:-1])/1000,'.', color='blue', alpha=0.2)
+    #ax2.plot(imagegrab_start_cam1[:] - imagegrab_start_cam0[:], '.', color='red', alpha=0.5)
     #ax2.plot(imagegrab_start_cam1[:]/1000, '.', color='blue', alpha=0.3)
     #ax2.plot(image_nidaq_cam0[:-1], '.', color='red', alpha=0.5)
     #ax2.plot(image_nidaq_cam1[:-1], '.', color='blue', alpha=0.5)
@@ -296,12 +305,13 @@ def main():
     #plt.xlabel('Frames')
     #plt.ylabel('JAABA Classifier Scores')
     #plt.legend(['BIAS JAABA score predictions', 'JAABA Classifier Demo-GT'], fontsize=8)
-    #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/comp_biasjaaba_predVsgt_woskip.pdf')
+    #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/comp_biasjaaba_predVsgt_woskip.pdf')'''
 
     plt.figure()
     ax4 = plt.gca()
     ax4.plot(total_lat[:],'.')
-    ax4.plot(np.ones(numFrames)*5)'''
+    ax4.plot(np.ones(numFrames)*5)
+    ax4.set_yticks(np.arange(-1,20,1))
     plt.show()
 
 if __name__ == "__main__":
