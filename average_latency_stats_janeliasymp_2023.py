@@ -6,7 +6,7 @@ import lat_defs as ld
 
 def main():
 
-    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/34448_1_12_2023/'
+    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/2c5ba_9_8_2022/'
     no_of_trials = 5
     numFrames = 100000
 
@@ -57,14 +57,14 @@ def main():
     jab_inter_cam0 = []
     jab_inter_cam1 = []
 
-    for i in range(0,no_of_trials):
+    for i in range(2,5):
 
         trial_type = str(i+1)
         cam_id = '0'
 
         imagegrab_file = data_dir + 'imagegrab_nidaqcam' + cam_id +'_short_trial' + trial_type + '.csv'
         jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
-        scores_file = data_dir + 'classifier_trial' + trial_type + '.csv'
+        #scores_file = data_dir + 'classifier_trial' + trial_type + '.csv'
 
         ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam0.lat_camtrig[i], imagegrab_data_cam0.lat_nidaq[i])
         ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam0.lat_camtrig[i], jaaba_data_cam0.lat_nidaq[i])
@@ -77,7 +77,7 @@ def main():
         ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam1.lat_camtrig[i], imagegrab_data_cam1.lat_nidaq[i])
         ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam1.lat_camtrig[i],
                              jaaba_data_cam1.lat_nidaq[i])
-        ut.readScoreData(scores_file, classifier_scores[i], 0) # last argument if gt or not flag
+        #ut.readScoreData(scores_file, classifier_scores[i], 0) # last argument if gt or not flag
 
         # calculating latencies
         jaaba_data_cam0.lat_process_time[i] = jaaba_data_cam0.lat_nidaq[i][:] - imagegrab_data_cam0.lat_nidaq[i][:]
@@ -86,9 +86,9 @@ def main():
                                                     imagegrab_data_cam0.lat_camtrig[i]
         imagegrab_data_cam1.lat_process_time[i] = imagegrab_data_cam1.lat_nidaq[i] - \
                                                       imagegrab_data_cam1.lat_camtrig[i]
-        classifier_scores[i].score_ts[:-1] = ((classifier_scores[i-1].score_ts[:-1])*0.02) - \
-                                             np.maximum(jaaba_data_cam0.lat_nidaq[i][1:],
-                                             jaaba_data_cam1.lat_nidaq[i][1:])
+        #classifier_scores[i].score_ts[:-1] = ((classifier_scores[i-1].score_ts[:-1])*0.02) - \
+        #                                     np.maximum(jaaba_data_cam0.lat_nidaq[i][1:],
+        #                                     jaaba_data_cam1.lat_nidaq[i][1:])
 
         #compute sum to calculate averages
         image_grab_cam0_avg += np.sum(imagegrab_data_cam0.lat_process_time[i][:-1])
@@ -111,10 +111,10 @@ def main():
     #computing averages
     camera_cap_avg = 0.2
 
-    image_grab_cam0_avg = image_grab_cam0_avg/(numFrames*no_of_trials)
-    image_grab_cam1_avg = image_grab_cam1_avg/(numFrames*no_of_trials)
-    jaaba_cam0_avg = np.sum(np.sum(jaaba_data_cam0.lat_process_time))/(numFrames*no_of_trials)
-    jaaba_cam1_avg = np.sum(np.sum(jaaba_data_cam1.lat_process_time))/(numFrames*no_of_trials)
+    image_grab_cam0_avg = image_grab_cam0_avg/(3*numFrames)#(numFrames*no_of_trials)
+    image_grab_cam1_avg = image_grab_cam1_avg/(3*numFrames)#(numFrames*no_of_trials)
+    jaaba_cam0_avg = np.sum(np.sum(jaaba_data_cam0.lat_process_time))/(3*numFrames)#(numFrames*no_of_trials)
+    jaaba_cam1_avg = np.sum(np.sum(jaaba_data_cam1.lat_process_time))/(3*numFrames)#(numFrames*no_of_trials)
     print('Average Image grab latency Cam 0',image_grab_cam0_avg)
     print('Average Image grab latency Cam 1',image_grab_cam1_avg)
     print('Average Jaaba latency Cam 0',jaaba_cam0_avg)
@@ -129,8 +129,8 @@ def main():
     scr_ts_avg = scr_ts_avg/(numFrames*no_of_trials)
     print('Scr ts avg', scr_ts_avg)
     ord_classifier_scr_ts = [val for x in classifier_scr_ts for val in x]
-    scr_ts_percentle = np.percentile(ord_classifier_scr_ts, perc)
-    print('Percentile scores collection', scr_ts_percentle)
+    #scr_ts_percentle = np.percentile(ord_classifier_scr_ts, perc)
+    #print('Percentile scores collection', scr_ts_percentle)
 
     plt.figure(figsize=(15,8))
     ax1=plt.gca()
@@ -141,14 +141,14 @@ def main():
     ax1.barh(['Cam 0'], camera_cap_avg, height=height, color='blue', alpha=alpha1)
     ax1.barh(['Cam 0'], image_grab_cam0_avg, left=camera_cap_avg,height=height, color='green', alpha=alpha1)
     ax1.barh(['Cam 0'], jaaba_cam0_avg, left=image_grab_cam0_avg+camera_cap_avg, height=height,color='brown',alpha=alpha1)
-    ax1.barh(['Cam 0'], scr_ts_avg, left=image_grab_cam0_avg+jaaba_cam0_avg+camera_cap_avg,height=height, color='orange',\
-             alpha=alpha1)
+    #ax1.barh(['Cam 0'], scr_ts_avg, left=image_grab_cam0_avg+jaaba_cam0_avg+camera_cap_avg,height=height, color='orange',\
+    #         alpha=alpha1)
     ax1.barh(['Cam 1'], camera_cap_avg, height=height, color='blue', alpha=alpha2)
     ax1.barh(['Cam 1'], image_grab_cam1_avg, left=camera_cap_avg, height=height, color='green', alpha=alpha2)
     ax1.barh(['Cam 1'], jaaba_cam1_avg, left=image_grab_cam1_avg + camera_cap_avg, height=height, color='brown',
              alpha=alpha2)
-    ax1.barh(['Cam 1'], scr_ts_avg, left=image_grab_cam1_avg + jaaba_cam1_avg + camera_cap_avg, height=height,
-             color='orange', alpha=alpha2)
+    #ax1.barh(['Cam 1'], scr_ts_avg, left=image_grab_cam1_avg + jaaba_cam1_avg + camera_cap_avg, height=height,
+    #         color='orange', alpha=alpha2)
     plt.xticks(np.arange(0,6.5,0.5))
     plt.legend(labels, loc='lower right')
     plt.xlabel('Time ms', fontsize=15)
@@ -170,10 +170,10 @@ def main():
                 alpha=alpha1, label=labels[0])
         ax2.barh(ylabel, jaaba_cam0_percentile[i], left=image_grab_cam0_percentile[i] + camera_cap_avg, height=2*height \
                  , color='lightsalmon', alpha=alpha1, label=labels[0])
-        ax2.barh(ylabel, ord_classifier_scr_ts[i], left=image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + \
-                 camera_cap_avg, height=2*height, color='orange', alpha=alpha1, label=labels[0])
-        total = ord_classifier_scr_ts[i]+ image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + \
-                 camera_cap_avg
+        #ax2.barh(ylabel, ord_classifier_scr_ts[i], left=image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + \
+        #         camera_cap_avg, height=2*height, color='orange', alpha=alpha1, label=labels[0])
+        #total = ord_classifier_scr_ts[i] + image_grab_cam0_percentile[i] + jaaba_cam0_percentile[i] + \
+        #         camera_cap_avg
         if idx ==4 :
             ax2.text(total+0.1, idx-0.2, 'Cam 0', color='black', fontweight='bold')
 
@@ -182,11 +182,11 @@ def main():
                  alpha=alpha2, align='edge',label = labels[1])
         ax2.barh(ylabel, jaaba_cam1_percentile[i], left=image_grab_cam1_percentile[i] + camera_cap_avg, height=height,
                  color='lightsalmon',alpha=alpha2, align='edge' , label = labels[1])
-        ax2.barh(ylabel, ord_classifier_scr_ts[i],
-                 left=image_grab_cam1_percentile[i] + jaaba_cam1_percentile[i] + camera_cap_avg, height=height,
-                 color='orange', alpha=alpha2, align='edge', label = labels[1])
-        total = ord_classifier_scr_ts[i] + image_grab_cam1_percentile[i] + jaaba_cam1_percentile[i] + \
-                camera_cap_avg
+        #ax2.barh(ylabel, ord_classifier_scr_ts[i],
+        #         left=image_grab_cam1_percentile[i] + jaaba_cam1_percentile[i] + camera_cap_avg, height=height,
+        #         color='orange', alpha=alpha2, align='edge', label = labels[1])
+        #total = ord_classifier_scr_ts[i] + image_grab_cam1_percentile[i] + jaaba_cam1_percentile[i] + \
+        #        camera_cap_avg
         if idx==4:
             ax2.text(total + 0.1, idx + 0.10, 'Cam 1', color='black', fontweight='bold')
         idx += 1

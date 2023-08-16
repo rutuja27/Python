@@ -44,15 +44,15 @@ def readConfigFile(filename, config):
                 else:
                     continue;
 
-def readcsvFile_nidaq(filename, arr_cam, arr_lat):
+def readcsvFile_nidaq(filename, arr_cam, arr_lat, period_ms):
 
     with open(filename, 'r', newline='') as f:
         frm_id=0
         config_reader = csv.reader(f, delimiter=',')
         for row in config_reader:
-            arr_cam[frm_id] = float(row[0])*0.02
+            arr_cam[frm_id] = float(row[0])*period_ms
 
-            arr_lat[frm_id] = (float(row[1])*0.02)
+            arr_lat[frm_id] = (float(row[1])*period_ms)
             frm_id += 1
 
 def readcsvFile_int(filename, arr, scaling_factor, row_id):
@@ -66,7 +66,7 @@ def readcsvFile_int(filename, arr, scaling_factor, row_id):
     fhandle.close()
 
 
-def readcsvFile_float(filename, arr, cam_id, plugin_prefix):
+def readcsvFile_float(filename, arr):
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 

@@ -154,6 +154,7 @@ def main():
         plt.title('Match skipped frames at imagegrab to frames skipped at scores scollection', fontsize=40, pad=20)
         ax2.tick_params(axis='x', labelsize=40)
         ax2_new.tick_params(axis='y', labelsize=40)
+        plt.show()
         #plt.savefig('C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/figs/random_intervals_side-front_skip_video_delay1800_scr.jpg')
 
 if __name__ == "__main__":
