@@ -14,7 +14,7 @@ import pandas as pd
 import utils as ut
 import sys
 
-def match_scores(gndtruth_scores, bias_pred_scores, bias_pred_view ,beh_names):
+def match_scores(gndtruth_scores, bias_pred_scores, bias_pred_view ,beh_names, isofflineScores):
 
     numbehs = len(beh_names)
 
@@ -51,10 +51,15 @@ def readScore_ts(arr1):
     plt.plot(scr_lat, '.', )
     plt.show()
 
-def plotScore(gndtruth_scores, bias_pred_scores, beh_names):
+def plotScore(gndtruth_scores, bias_pred_scores, offline_pred_scores, beh_names, isofflineScores):
 
     numbehs = len(gndtruth_scores)
-    fig, ax = plt.subplots(numbehs,1, figsize=(15,15))
+    if(isofflineScores):
+        fig, ax = plt.subplots(numbehs, 3, figsize=(15, 15))
+    else:
+        fig, ax = plt.subplots(numbehs, 1, figsize=(15,15))
+
+    rows = ['{}'.format(beh) for beh in beh_names]
     plt.subplots_adjust(left=0.1,
                         bottom=0.1,
                         right=0.9,
@@ -63,16 +68,39 @@ def plotScore(gndtruth_scores, bias_pred_scores, beh_names):
                         hspace=0.4)
 
     for i in range(0, numbehs):
-        print(gndtruth_scores[i])
-        print(bias_pred_scores[i])
-        ax[i].plot(gndtruth_scores[i], bias_pred_scores[i], '.')
-        ax[i].set_title(beh_names[i])
-    plt.show()
 
-def plot_diff_scores(gndtruth_scores, bias_pred_scores, beh_names):
+        if(isofflineScores):
+            ax[i][0].plot(gndtruth_scores[i][:], bias_pred_scores[i][:], '.')
+            ax[i][0].set_xlabel('Ground truth Scores')
+            ax[i][0].set_ylabel('Biasjaaba pred scores')
+
+            ax[i][1].plot(gndtruth_scores[i][:], offline_pred_scores[i][:], '.')
+            ax[i][1].set_xlabel('Ground truth Scores')
+            ax[i][1].set_ylabel('offline jaaba pred scores')
+
+            ax[i][2].plot(offline_pred_scores[i][:], bias_pred_scores[i][:], '.')
+            ax[i][2].set_ylabel('Biasjaaba scores')
+            ax[i][2].set_xlabel('offline jaaba pred scores')
+        else:
+            ax[i].plot(gndtruth_scores[i][:], bias_pred_scores[i][:], '.')
+            ax[i].set_xlabel('Ground truth Scores')
+            ax[i].set_ylabel('Biasjaaba pred scores')
+
+    if isofflineScores :
+        for ax_id, row in zip(ax[:,0], rows):
+            ax_id.set_ylabel(row, rotation=90, size='large')
+    else:
+        for ax_id, row in zip(ax[:], rows):
+            ax_id.set_ylabel(row, rotation=90, size='large')
+
+def plot_diff_scores(gndtruth_scores, bias_pred_scores, offline_pred_scores, beh_names, isofflineScores):
 
     numbehs = len(gndtruth_scores)
-    fig, ax = plt.subplots(numbehs, 1, figsize=(15, 15))
+    if(isofflineScores):
+       fig, ax = plt.subplots(numbehs, 3, figsize=(15, 15))
+    else:
+       fig, ax = plt.subplots(numbehs, 1, figsize=(15, 15))
+
     plt.subplots_adjust(left=0.1,
                         bottom=0.1,
                         right=0.9,
@@ -82,14 +110,34 @@ def plot_diff_scores(gndtruth_scores, bias_pred_scores, beh_names):
 
     for i in range(0, numbehs):
         diff = abs(gndtruth_scores[i] - bias_pred_scores[i])
+        sorted_diff = np.sort(diff)
         max_diff = max(diff)
-        print(max_diff)
-        ax[i].plot(gndtruth_scores[i] - bias_pred_scores[i], '.')
-        ax[i].set_title(beh_names[i])
-        ax[i].set_yticks(np.arange((max_diff)*-1, max_diff, 10.0))
-    plt.show()
+        print(sorted_diff[::-1])
 
-def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_filename, numFrames):
+
+        if(isofflineScores):
+            ax[i][0].plot(gndtruth_scores[i] - bias_pred_scores[i], '.')
+            ax[i][0].set_ylabel(beh_names[i])
+            ax[i][0].set_yticks(np.arange((max_diff) * -1, max_diff, 10.0))
+            if (i == 0):
+                ax[i][0].set_title('Difference between gndtruth and bias scores')
+
+            ax[i][1].plot(gndtruth_scores[i] - offline_pred_scores[i], '.')
+            ax[i][1].set_yticks(np.arange((max_diff)*-1, max_diff, 10.0))
+            if (i == 0):
+                ax[i][1].set_title('Difference between gndtruth and offline scores')
+
+            ax[i][2].plot(offline_pred_scores[i] - bias_pred_scores[i], '.')
+            ax[i][2].set_yticks(np.arange((max_diff)*-1, max_diff, 10.0))
+            if(i==0):
+                ax[i][2].set_title('Difference between offline and bias_scores ')
+        else:
+            ax[i].plot(gndtruth_scores[i] - bias_pred_scores[i], '.')
+            ax[i].set_ylabel(beh_names[i])
+            ax[i].set_yticks(np.arange((max_diff) * -1, max_diff, 10.0))
+
+def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_offline_file_path,
+                  pred_score_filename, numFrames, isofflineScores):
 
     behavior_scores = ["scores_Lift", "scores_Handopen", "scores_Grab", "scores_Supinate", "scores_Chew",
                        "scores_Atmouth"]
@@ -102,41 +150,55 @@ def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_fil
     bias_pred_scores_view = np.zeros((numbehs ,numFrames) ,dtype=np.int)
     bias_scores_ts = np.zeros((numbehs, numFrames), dtype=np.int64)
 
+    offline_pred_scores = np.zeros((numbehs,numFrames), dtype=np.double)
+
     for i in range(0, numbehs):
 
         ## predicted from matlab
         gndtruth_scores_struct = loadmat(gndtruth_score_file_path + behavior_scores[i] + '.mat')
-        gnd_scores[i][:] = np.array(gndtruth_scores_struct['allScores']['scores'][0][0][0][0][0][0:-1])
+        gnd_scores[i][:] = np.array(gndtruth_scores_struct['allScores']['scores'][0][0][0][0][0][:])
 
         ## predicted from bias jaaba
         bias_pred_file = pred_score_file_path + pred_score_filename + '.csv';
         ut.read_score(bias_pred_file, bias_pred_scores[i], 0, i+3)
         ut.read_score(bias_pred_file, bias_pred_scores_view[i], 0, 10)
 
-    plotScore(gnd_scores, bias_pred_scores, behavior_scores)
-    plot_diff_scores(gnd_scores, bias_pred_scores, behavior_scores)
-    match_scores(gnd_scores, bias_pred_scores, bias_pred_scores_view, behavior_scores)
+        ## predicted scores from offline jaaba
+        if(isofflineScores):
+            pred_offline_file = pred_score_offline_file_path + pred_score_filename + '.csv';
+            ut.read_score(pred_offline_file, offline_pred_scores[i],0, i+3);
+
+    plotScore(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_scores, isofflineScores)
+    plot_diff_scores(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_scores, isofflineScores)
+    match_scores(gnd_scores, bias_pred_scores, bias_pred_scores_view, behavior_scores, isofflineScores)
+
+    plt.show()
 
 def main():
 
     print('Number of arguments', len(sys.argv))
     print('Argument list', str(sys.argv))
 
-    if(len(sys.argv) < 3):
+    if(len(sys.argv) < 7):
         print('Insufficient arguments')
         print('Argument Options:\n' +
               '-path to groundtruth score file\n' +
               '-path to predicted score file\n' +
+              '-path to predicted score file offline\n'
               '-predicted  score file name\n' +
               '-number of frames for which score is predicted\n'
+              '-is offline scores'
               )
 
     else:
         gndtruth_score_file_path = sys.argv[1]
         pred_score_file_path = sys.argv[2]
-        pred_score_filename = sys.argv[3]
-        numFrames = np.int(sys.argv[4])
-        loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_filename, numFrames)
+        pred_score_offline_file_path = sys.argv[3]
+        pred_score_filename = sys.argv[4]
+        numFrames = np.int(sys.argv[5])
+        isofflineScores = np.int(sys.argv[6])
+        loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_offline_file_path,
+                    pred_score_filename, numFrames, isofflineScores)
 
     '''scr_diff = (abs(gnd_scores[0][0][0][:-1] - bias_pred_scores[:]))
     sort_diff = np.sort(scr_diff)

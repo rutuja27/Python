@@ -1,6 +1,7 @@
 import csv
 import re
 import numpy as np
+import colorsys
 
 def readConfigFile(filename, config):
     with open(filename, 'r', newline='') as f:
@@ -65,6 +66,15 @@ def readcsvFile_int(filename, arr, scaling_factor, row_id):
 
     fhandle.close()
 
+def readcsvFile_int64(filename, arr, scaling_factor, row_id):
+
+    fhandle = open(filename)
+    data_grab = csv.reader(fhandle, delimiter=',')
+
+    for idx, row in enumerate(data_grab):
+        arr[idx] = np.uint64(row[row_id])/scaling_factor
+
+    fhandle.close()
 
 def readcsvFile_float(filename, arr):
     fhandle = open(filename)
@@ -245,9 +255,9 @@ def readScoreData(filename, scr_obj, flag_gt):
                     scr_obj.score_ts[idx - 1] = np.float(row[0])
                     scr_obj.score_side_ts[idx - 1] = np.float(row[1])
                     scr_obj.score_front_ts[idx - 1] = np.float(row[2])
-                    scr_obj.scores[idx - 1] = np.float(row[3])
-                    scr_obj.frameCount[idx - 1] = np.int(row[4])
-                    scr_obj.view[idx -1 ] = np.int(row[5])
+                    #scr_obj.scores[idx - 1][0] = np.float(row[3])
+                    scr_obj.frameCount[idx - 1] = np.int(row[9])
+                    scr_obj.view[idx -1 ] = np.int(row[10])
 
 def readArray(filename, arr, index):
 
@@ -257,6 +267,18 @@ def readArray(filename, arr, index):
             arr.append(np.float(row[index]))
 
     f.close()
+
+#https://saturncloud.io/blog/darken-or-lighten-a-color-in-matplotlib-a-guide/
+def adjust_lightness(color, amount):
+
+    import matplotlib.colors as mc
+    try:
+        c = mc.cnames[color]
+    except:
+        c = color
+    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+    return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
+
 
 
 
