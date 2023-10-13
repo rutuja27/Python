@@ -34,13 +34,13 @@ def read_end2endData(filepath, classifier_filename, imagegrab_file_prefix,
         imagegrab_filename_cam1 = filepath + imagegrab_file_prefix + 'cam1_short_trial' + str(trial_id) + '.csv'
 
         if isnidaq:
-            ut.readcsvFile_nidaq(imagegrab_filename_cam0,imagegrab_trig_cam0, imagegrab_startlat_cam0, conversion_factor)
-            ut.readcsvFile_nidaq(imagegrab_filename_cam1, imagegrab_trig_cam1, imagegrab_startlat_cam1, conversion_factor)
+            ut.readcsvFile_nidaq(imagegrab_filename_cam0,imagegrab_trig_cam0, imagegrab_startlat_cam0, numFrames, conversion_factor)
+            ut.readcsvFile_nidaq(imagegrab_filename_cam1, imagegrab_trig_cam1, imagegrab_startlat_cam1, numFrames, conversion_factor)
         else:
-            ut.readcsvFile_int(imagegrab_filename_cam0, imagegrab_startlat_cam0, conversion_factor, 0)
-            ut.readcsvFile_int(imagegrab_filename_cam1, imagegrab_startlat_cam1, conversion_factor, 0)
+            ut.readcsvFile_int(imagegrab_filename_cam0, imagegrab_startlat_cam0, numFrames, conversion_factor, 0)
+            ut.readcsvFile_int(imagegrab_filename_cam1, imagegrab_startlat_cam1, numFrames, conversion_factor, 0)
 
-        ut.read_score(classifier_score_file, classifier_lat, 0, 0)
+        ut.read_score(classifier_score_file, classifier_lat, numFrames,  0, 0)
         #print(classifier_lat)
 
         if isnidaq:
@@ -93,7 +93,7 @@ def main():
         no_of_trials = np.int(sys.argv[5])
         conversion_factor = np.float(sys.argv[6])
         framerate = np.int(sys.argv[7])
-        latency_threshold = np.int(sys.argv[8])
+        latency_threshold = np.float(sys.argv[8])
         isnidaq = np.int(sys.argv[9])
 
 

@@ -202,6 +202,7 @@ def plot_skipped_frames_latencyplot(isClassifier, total_lat,
         min_total_lat = min(total_lat)
         print(max_total_lat)
         print(min_total_lat)
+
         plt.plot(total_lat[range],'.',color='black')
         plt.plot(classifier_skips[range],'.',color='red')
         plt.plot(classifier_skips_nonmatch[range], '.', color='blue')
@@ -211,8 +212,6 @@ def plot_skipped_frames_latencyplot(isClassifier, total_lat,
         plt.ylabel('Latency in ms', fontsize=fontsize)
         plt.legend(['Latency', 'skipped', 'latency and skip non match'])
         plt.title('Classifier end to end latency with skipped frames', fontsize=fontsize)
-
-
 
 
 def plot_process_scores_latency(isClassifier, isVideo,
@@ -315,43 +314,43 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
 
     # Read data from csv
     if isImagegrab:
-        ut.readcsvFile_int(imagegrab_file_cam0, imagegrab_start_cam0, 1000, 0)
-        ut.readcsvFile_int(img_end_time_cam0, image_end_time_cam0, 1000, 0)
-        ut.readcsvFile_int(img_proc_cam0, imagegrab_process_time_cam0, 1000, 0)
-        ut.readcsvFile_nidaq(imagegrab_nidaq_cam0, image_nidaq_camtrig0, image_nidaq_cam0,0.02)
-        ut.readcsvFile_int(image_nidaqThres_cam0, image_nidaqThres0, 1, 0)
-        #ut.readcsvFile_int(img_skipped_cam0, imagegrab_skipped_cam0, 1, 0)
+        ut.readcsvFile_int(imagegrab_file_cam0, imagegrab_start_cam0, numFrames, 1000, 0)
+        ut.readcsvFile_int(img_end_time_cam0, image_end_time_cam0, numFrames, 1000, 0)
+        ut.readcsvFile_int(img_proc_cam0, imagegrab_process_time_cam0, numFrames, 1000, 0)
+        ut.readcsvFile_nidaq(imagegrab_nidaq_cam0, image_nidaq_camtrig0, image_nidaq_cam0, numFrames, 0.02)
+        ut.readcsvFile_int(image_nidaqThres_cam0, image_nidaqThres0, numFrames, 1, 0)
+        #ut.readcsvFile_int(img_skipped_cam0, imagegrab_skipped_cam0, numFrames, 1, 0)
 
     if isJaaba:
-        ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0,0.02)
-        ut.readcsvFile_int(jaaba_nidaqThres_cam0, jaaba_nidaqThres0,1, 0)
-        ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, 1000, 0)
-        ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0,1000, 0)
-        ut.readcsvFile_int(jaaba_endfile_cam0, jaaba_end_cam0, 1000,0)
+        ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0, numFrames, 0.02)
+        ut.readcsvFile_int(jaaba_nidaqThres_cam0, jaaba_nidaqThres0, numFrames, 1, 0)
+        ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, numFrames, 1000, 0)
+        ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0,numFrames, 1000, 0)
+        ut.readcsvFile_int(jaaba_endfile_cam0, jaaba_end_cam0, numFrames, 1000,0)
 
     if numCameras == 2:
 
         if isImagegrab:
-            ut.readcsvFile_int(imagegrab_file_cam1, imagegrab_start_cam1, 1000, 0)
-            ut.readcsvFile_int(img_proc_cam1, imagegrab_process_time_cam1, 1000, 0)
-            ut.readcsvFile_int(img_end_time_cam1, image_end_time_cam1, 1000, 0)
-            ut.readcsvFile_nidaq(imagegrab_nidaq_cam1, image_nidaq_camtrig1, image_nidaq_cam1,0.02)
-            ut.readcsvFile_int(image_nidaqThres_cam1, image_nidaqThres1, 1, 0)
-            #ut.readcsvFile_int(img_skipped_cam1, imagegrab_skipped_cam1, 1, 0)
+            ut.readcsvFile_int(imagegrab_file_cam1, imagegrab_start_cam1,numFrames,1000, 0)
+            ut.readcsvFile_int(img_proc_cam1, imagegrab_process_time_cam1, numFrames, 1000, 0)
+            ut.readcsvFile_int(img_end_time_cam1, image_end_time_cam1, numFrames, 1000, 0)
+            ut.readcsvFile_nidaq(imagegrab_nidaq_cam1, image_nidaq_camtrig1, image_nidaq_cam1, numFrames, 0.02)
+            ut.readcsvFile_int(image_nidaqThres_cam1, image_nidaqThres1, numFrames, 1, 0)
+            #ut.readcsvFile_int(img_skipped_cam1, imagegrab_skipped_cam1, numFrames, 1, 0)
 
         if isJaaba:
-            ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1,0.02)
-            ut.readcsvFile_int(jaaba_nidaqThres_cam1, jaaba_nidaqThres1,1, 0)
-            ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, 1000, 0)
-            ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1,1000, 0)
-            ut.readcsvFile_int(jaaba_endfile_cam1, jaaba_end_cam1, 1000,0)
+            ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1, numFrames,0.02)
+            ut.readcsvFile_int(jaaba_nidaqThres_cam1, jaaba_nidaqThres1, numFrames, 1, 0)
+            ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, numFrames, 1000, 0)
+            ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1,numFrames, 1000, 0)
+            ut.readcsvFile_int(jaaba_endfile_cam1, jaaba_end_cam1, numFrames, 1000,0)
 
     # read ts from score files
     if isClassifier:
-        ut.read_score(classifier_scr_file, classifier_side_scr_ts, 0, 1)
-        ut.read_score(classifier_scr_file, classifier_front_scr_ts, 0, 2)
-        ut.read_score(classifier_scr_file, classifier_scr_ts, 0, 0)
-        ut.read_score(classifier_scr_file, classifier_scr_view, 0, 10)
+        ut.read_score(classifier_scr_file, classifier_side_scr_ts, numFrames, 0, 1)
+        ut.read_score(classifier_scr_file, classifier_front_scr_ts, numFrames, 0, 2)
+        ut.read_score(classifier_scr_file, classifier_scr_ts, numFrames,0, 0)
+        ut.read_score(classifier_scr_file, classifier_scr_view, numFrames, 0, 10)
 
     if isImagegrab:
         image_nidaq_cam0 = image_nidaq_cam0 - image_nidaq_camtrig0
@@ -376,18 +375,26 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
             classifier_scr_ts = classifier_scr_ts / 1000
             classifier_side_scr_ts = classifier_side_scr_ts / 1000
             classifier_front_scr_ts = classifier_front_scr_ts / 1000
-
+        elif not isVideo and isClassifier:
+            classifier_scr_ts = classifier_scr_ts * 0.02
+            classifier_side_scr_ts = classifier_side_scr_ts * 0.02
+            classifier_front_scr_ts = classifier_front_scr_ts * 0.02
 
     if isImagegrab and isClassifier:
         if not isVideo:
-            total_lat = ((classifier_scr_ts[:] * 0.02) - image_nidaq_camtrig0[:])
+            total_lat = ((classifier_scr_ts[:]) - image_nidaq_camtrig0[:])
             total_lat[total_lat < 0] = 0
             print(total_lat)
+            print(classifier_side_scr_ts)
+            print(classifier_front_scr_ts)
         else:
             total_lat = (classifier_scr_ts[:] - imagegrab_min)
             print('Skipped in both views', np.argwhere(total_lat < 0))
             total_lat[total_lat < 0] = 0
-            print(total_lat[:])
+            print(total_lat[2])
+            print(imagegrab_min[2])
+            print(classifier_scr_ts[2])
+            print(classifier_scr_ts[2] - imagegrab_min[2])
 
     img_camtrig_diff_max_cam0 = max(image_nidaq_camtrig0[1:]-image_nidaq_camtrig0[0:-1])
     img_camtrig_diff_max_cam1 = max(image_nidaq_camtrig1[1:]-image_nidaq_camtrig1[0:-1])
@@ -416,9 +423,9 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
                                         classifier_side_scr_ts, classifier_front_scr_ts,
                                         classifier_scr_ts, start_range, end_range)
         else:
-            '''plot_process_scores_latency(isClassifier, isVideo,
+            plot_process_scores_latency(isClassifier, isVideo,
                                         classifier_side_scr_ts, classifier_front_scr_ts,
-                                        )'''
+                                        classifier_scr_ts,start_range, end_range)
     plt.show()
 
 def main():

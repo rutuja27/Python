@@ -11,16 +11,31 @@ def check_output_latency(total_latency, lat_wo_processScores, exp_total_latency,
 
     count_wrong_skips = 0
     unknown_latency_skip = 0
-    known_latency_skip = 0 # skips
+    known_latency_skip = 0 # skips due to latency in jaaba or imagegrab threads
+    frames_not_skipped = 0  ## frames not skipped but have latency higher than threshold
+                            ## because of processScores thread
+    both_frames_skipped = 0
+
     known_latency_skip_id = []
     unknown_latency_skip_id = []
     wrong_skip_ids = []
-    wait_thres_delta = 0.3 # wait ime in ms
+    both_frames_skip_ids = []
+    frames_not_skipped_ids = []
+
+    wait_thres_delta = 0.3 # wait time in ms
+
+    print(total_latency[2797])
 
     for frm_id in range(0,numFrames):
         if(total_latency[frm_id] > latency_thres):
                if(classifier_skips[frm_id] == 3):
+                   ##higher latency due to procesScores thread
+                   ## scores are collected at the processScores thread
+                   ## at a reasonable time but sending to pulse to laser takes long
+                   ## hence the overall latecny above threshold but both views are not skipped.
                    if(lat_wo_processScores[frm_id]  <= (exp_total_latency[frm_id] + wait_thres_delta)):
+                       frames_not_skipped += 1
+                       frames_not_skipped_ids.append(frm_id)
                        continue
                    else:
                        count_wrong_skips += 1
@@ -34,12 +49,20 @@ def check_output_latency(total_latency, lat_wo_processScores, exp_total_latency,
                    else:
                        unknown_latency_skip += 1
                        unknown_latency_skip_id.append(frm_id)
+               elif(classifier_skips[frm_id] == -1):
+                   both_frames_skipped += 1
+                   both_frames_skip_ids.append(frm_id)
+
     print('Wrong skips in classifier' , count_wrong_skips)
     print('Unknown latency skips', unknown_latency_skip)
     print('Known latency skips', known_latency_skip)
+    print('Frames not skipped but latency processScores', frames_not_skipped)
+    print('Frames skipped in both views', both_frames_skipped)
     print('Known latency_skips frame ids', known_latency_skip_id)
     print('Unknown latency_skips frame ids', unknown_latency_skip_id)
     print('wrong latency_skips frame ids', wrong_skip_ids)
+    print('frame not skipped but latency in processScores', frames_not_skipped_ids)
+    print('frames skipped in both views ids',  both_frames_skip_ids)
 
 def readData(filepath, classifier_file_name, isnidaq, trial_num, numFrames,
              jaaba_nidaq_ts_prefix, jaaba_end_ts_perfix,
@@ -47,7 +70,6 @@ def readData(filepath, classifier_file_name, isnidaq, trial_num, numFrames,
              start_range, end_range, latency_thres):
 
     classifier_file = filepath + classifier_file_name + trial_num + '.csv'
-    print('IsNidaq', isnidaq)
 
     if isnidaq:
         jaaba_lat_cam0_file = filepath + jaaba_nidaq_ts_prefix + 'cam0_short_trial' + trial_num + '.csv'
@@ -82,21 +104,21 @@ def readData(filepath, classifier_file_name, isnidaq, trial_num, numFrames,
     classifier_frames_skip = np.array(numFrames * [0])
 
     if isnidaq:
-        ut.readcsvFile_nidaq(imagegrab_lat_cam0_file, imagegrab_camtrig_cam0,imagegrab_lat_cam0, 0.02)
-        ut.readcsvFile_nidaq(imagegrab_lat_cam1_file, imagegrab_camtrig_cam1, imagegrab_lat_cam1, 0.02)
-        ut.readcsvFile_nidaq(jaaba_lat_cam0_file, jaaba_nidaq_camtrig_cam0, jaaba_lat_cam0, 0.02)
-        ut.readcsvFile_nidaq(jaaba_lat_cam1_file, jaaba_nidaq_camtrig_cam1, jaaba_lat_cam1, 0.02)
+        ut.readcsvFile_nidaq(imagegrab_lat_cam0_file, imagegrab_camtrig_cam0,imagegrab_lat_cam0,numFrames, 0.02)
+        ut.readcsvFile_nidaq(imagegrab_lat_cam1_file, imagegrab_camtrig_cam1, imagegrab_lat_cam1,numFrames, 0.02)
+        ut.readcsvFile_nidaq(jaaba_lat_cam0_file, jaaba_nidaq_camtrig_cam0, jaaba_lat_cam0,numFrames, 0.02)
+        ut.readcsvFile_nidaq(jaaba_lat_cam1_file, jaaba_nidaq_camtrig_cam1, jaaba_lat_cam1,numFrames, 0.02)
 
     else:
-        ut.readcsvFile_int(jaaba_lat_cam0_file, jaaba_lat_cam0, 1000, 0)
-        ut.readcsvFile_int(jaaba_lat_cam1_file, jaaba_lat_cam1, 1000, 0)
-        ut.readcsvFile_int(imagegrab_lat_cam0_file, imagegrab_lat_cam0, 1000, 0)
-        ut.readcsvFile_int(imagegrab_lat_cam1_file, imagegrab_lat_cam1, 1000, 0)
+        ut.readcsvFile_int(jaaba_lat_cam0_file, jaaba_lat_cam0,numFrames, 1000, 0)
+        ut.readcsvFile_int(jaaba_lat_cam1_file, jaaba_lat_cam1,numFrames, 1000, 0)
+        ut.readcsvFile_int(imagegrab_lat_cam0_file, imagegrab_lat_cam0,numFrames, 1000, 0)
+        ut.readcsvFile_int(imagegrab_lat_cam1_file, imagegrab_lat_cam1,numFrames, 1000, 0)
 
-    ut.read_score(classifier_file, classifier_scr_ts, 0, 0)
-    ut.read_score(classifier_file, classifier_scr_ts_side, 0, 1)
-    ut.read_score(classifier_file, classifier_scr_ts_front, 0, 2)
-    ut.read_score(classifier_file, classifier_scr_view, 0, 10)
+    ut.read_score(classifier_file, classifier_scr_ts,numFrames, 0, 0)
+    ut.read_score(classifier_file, classifier_scr_ts_side,numFrames, 0, 1)
+    ut.read_score(classifier_file, classifier_scr_ts_front,numFrames, 0, 2)
+    ut.read_score(classifier_file, classifier_scr_view,numFrames, 0, 10)
 
     if isnidaq:
         classifier_scr_ts = classifier_scr_ts * 0.02
@@ -119,6 +141,8 @@ def readData(filepath, classifier_file_name, isnidaq, trial_num, numFrames,
     exp_imagegrab_ts = imagegrab_start_min_fstfrm + (2.5 * np.arange(0,numFrames,1))
 
     # predicted total latency
+    print('classifier scr ts',classifier_scr_ts[2797])
+    print('imagegrab min', imagegrab_start_min[2797])
     total_lat = classifier_scr_ts - imagegrab_start_min
     total_lat[total_lat < 0] = 0 ## assign zero latency to frames in classifier skipped in both views
 
@@ -161,7 +185,7 @@ def plot_total_lat(classifier_scr_ts,total_lat,  total_lat_pred,
     plt.plot(total_lat_pred[range],linestyle='--',marker='*',color='pink', alpha=0.6)
     plt.plot(total_lat_wo_processScores_lat[range], linestyle='--', marker='o', color='orange', alpha=0.4)
     plt.plot(classifier_frames_skip[range], '.', color='red', alpha=0.8)
-    plt.plot(diff_predVsexp_totollat[range], linestyle = '--', marker='>', alpha=1.0)
+    plt.plot(diff_predVsexp_totollat[range], linestyle = '--', marker='>', alpha=1.0, color='blue')
     plt.yticks(np.arange(0,10,1))
 
 def main():

@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
@@ -7,10 +8,23 @@ import math as mth
 
 def main():
 
-    data_dir = 'C:/Users/27rut/BIAS/misc/jaaba_plugin_day_trials/plugin_latency/nidaq/multi/08381_9_26_2023_cam/'
-    no_of_trials = 5
-    numFrames = 10000
-    period_ms = 0.02
+    print('Number of arguments', len(sys.argv))
+    print('Argument list', str(sys.argv))
+
+    if(len(sys.argv) < 5):
+        print('Insufficient arguments')
+        print('Argument Options:\n' +
+              '-path to latency data\n' +
+              '-number of trials\n' +
+              '-number of frames per trial\n'
+              '-conversion factor for latency to ms'
+              )
+
+    else:
+        data_dir = sys.argv[1]
+        no_of_trials = np.int(sys.argv[2])
+        numFrames = np.int(sys.argv[3])
+        period_ms = np.float(sys.argv[4])
 
     imagegrab_data_cam0 = ld.LatencyData(np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
@@ -68,21 +82,21 @@ def main():
         jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
 
         ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam0.lat_camtrig[i],
-                             imagegrab_data_cam0.lat_nidaq[i], period_ms)
+                             imagegrab_data_cam0.lat_nidaq[i], numFrames, period_ms)
         ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam0.lat_camtrig[i],
-                             jaaba_data_cam0.lat_nidaq[i], period_ms)
+                             jaaba_data_cam0.lat_nidaq[i], numFrames, period_ms)
 
         cam_id='1'
         imagegrab_file = data_dir + 'imagegrab_nidaqcam' + cam_id +'_short_trial' + trial_type + '.csv'
         jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
 
-        scores_file = data_dir + 'classifier_trial' + trial_type + '.csv'
+        scores_file = data_dir + 'classifier_v00' + trial_type + '.csv'
 
         ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam1.lat_camtrig[i],
-                             imagegrab_data_cam1.lat_nidaq[i], period_ms)
+                             imagegrab_data_cam1.lat_nidaq[i], numFrames, period_ms)
         ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam1.lat_camtrig[i],
-                             jaaba_data_cam1.lat_nidaq[i],period_ms)
-        ut.readScoreData(scores_file, classifier_scores[i], 0) # last argument if gt or not flag
+                             jaaba_data_cam1.lat_nidaq[i], numFrames, period_ms)
+        ut.readScoreData(scores_file, classifier_scores[i], numFrames, 0) # last argument if gt or not flag
 
         # calculating latencies
         jaaba_data_cam0.lat_process_time[i] = jaaba_data_cam0.lat_nidaq[i][:] - imagegrab_data_cam0.lat_nidaq[i][:]

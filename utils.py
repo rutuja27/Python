@@ -45,62 +45,64 @@ def readConfigFile(filename, config):
                 else:
                     continue;
 
-def readcsvFile_nidaq(filename, arr_cam, arr_lat, period_ms):
+def readcsvFile_nidaq(filename, arr_cam, arr_lat, numFrames, period_ms):
 
     with open(filename, 'r', newline='') as f:
         frm_id=0
         config_reader = csv.reader(f, delimiter=',')
-        for row in config_reader:
-            arr_cam[frm_id] = float(row[0])*period_ms
+        for idx,row in enumerate(config_reader):
+            if idx < numFrames:
+                arr_cam[frm_id] = float(row[0])*period_ms
 
-            arr_lat[frm_id] = (float(row[1])*period_ms)
-            frm_id += 1
+                arr_lat[frm_id] = (float(row[1])*period_ms)
+                frm_id += 1
 
-def readcsvFile_int(filename, arr, scaling_factor, row_id):
+def readcsvFile_int(filename, arr, numFrames, scaling_factor, row_id):
+
+    fhandle = open(filename)
+    data_grab = csv.reader(fhandle, delimiter=',')
+    for idx, row in enumerate(data_grab):
+        if idx < numFrames:
+            arr[idx] = np.int(row[row_id])/scaling_factor
+
+    fhandle.close()
+
+def readcsvFile_int64(filename, arr, numFrames, scaling_factor, row_id):
 
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 
     for idx, row in enumerate(data_grab):
-        arr[idx] = np.int(row[row_id])/scaling_factor
+        if idx < numFrames:
+            arr[idx] = np.uint64(row[row_id])/scaling_factor
 
     fhandle.close()
 
-def readcsvFile_int64(filename, arr, scaling_factor, row_id):
-
+def readcsvFile_float(filename, arr, numFrames):
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
 
     for idx, row in enumerate(data_grab):
-        arr[idx] = np.uint64(row[row_id])/scaling_factor
-
-    fhandle.close()
-
-def readcsvFile_float(filename, arr):
-    fhandle = open(filename)
-    data_grab = csv.reader(fhandle, delimiter=',')
-
-    for idx, row in enumerate(data_grab):
-        arr[idx] = np.float(row[0])
+        if idx < numFrames:
+            arr[idx] = np.float(row[0])
     fhandle.close()
 
 
-def readcsvFile_f2f(filename, arr, f2f_flag, cam_id, plugin_prefix):
+def readcsvFile_f2f(filename, arr, numFrames, f2f_flag, cam_id, plugin_prefix):
     # if cam_id == 1 and plugin_prefix == 'jaaba_plugin':
     #    return
-
     fhandle = open(filename)
     data_grab = csv.reader(fhandle, delimiter=',')
     for idx, row in enumerate(data_grab):
-
-        if f2f_flag:
-            if idx == 0:
-                prev = np.float(row[0])
+        if idx < numFrames:
+            if f2f_flag:
+                if idx == 0:
+                    prev = np.float(row[0])
+                else:
+                    arr[idx] = (np.float(row[0]) - prev) / 1000
+                    prev = np.float(row[0])
             else:
-                arr[idx] = (np.float(row[0]) - prev) / 1000
-                prev = np.float(row[0])
-        else:
-            arr[idx] = np.float(row[0]) / 1000
+                arr[idx] = np.float(row[0]) / 1000
 
     fhandle.close()
 
@@ -211,53 +213,71 @@ def maxPeak(latency_arr, latency_filt_arr, height):
     return [len(peaks), peaks]
 
 ## index is the column to read from score file
-## flag_gt - if score file is gt or not
-def read_score(filename,arr_scr,flag_gt,index):
+## flag_gt - if score file is gt or not - scores file from jaaba is gt
+def read_score(filename,arr_scr, numFrames, flag_gt, index):
+
+    if flag_gt:
+        total_lines_to_read = numFrames
+    else:
+        total_lines_to_read = numFrames + 1
 
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
-            if(not flag_gt):
-                if(idx ==0):
-                   continue
-                arr_scr[idx-1] = np.float(row[index])
-            else:
-                arr_scr[idx] = np.float(row[index])
+            if idx < total_lines_to_read:
+                if(not flag_gt):
+                    if(idx ==0):
+                        continue
+                    arr_scr[idx-1] = np.float(row[index])
+                else:
+                    arr_scr[idx] = np.float(row[index])
     f.close()
 
 def read_score_view(filename, arr_scr_view, arr_scr, arr_scr_side,
-                    arr_scr_front, flag_gt, index):
+                    arr_scr_front, numFrames, flag_gt, index):
+
+    if flag_gt:
+        total_lines_to_read = numFrames
+    else:
+        total_lines_to_read = numFrames + 1
 
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
-            if(not flag_gt):
-                if (idx == 0):
-                    continue
-                arr_scr_view[idx-1] = np.int(row[index])
-                if(arr_scr_view[idx-1] == 1):
-                    arr_scr_side[idx-1] = np.float(row[3])
-                elif(arr_scr_view[idx-1] == 2):
-                    arr_scr_front[idx-1] = np.float(row[3])
-                else:
-                    arr_scr[idx-1] = np.float(row[3])
+            if idx < total_lines_to_read:
+                if(not flag_gt):
+                    if (idx == 0):
+                        continue
+                    arr_scr_view[idx-1] = np.int(row[index])
+                    if(arr_scr_view[idx-1] == 1):
+                        arr_scr_side[idx-1] = np.float(row[3])
+                    elif(arr_scr_view[idx-1] == 2):
+                        arr_scr_front[idx-1] = np.float(row[3])
+                    else:
+                        arr_scr[idx-1] = np.float(row[3])
     f.close()
 
-def readScoreData(filename, scr_obj, flag_gt):
+def readScoreData(filename, scr_obj, numFrames, flag_gt):
+
+    if flag_gt:
+        total_lines_to_read = numFrames
+    else:
+        total_lines_to_read = numFrames + 1
 
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
-            if not flag_gt:
-                if idx ==0:
-                    continue
-                else:
-                    scr_obj.score_ts[idx - 1] = np.float(row[0])
-                    scr_obj.score_side_ts[idx - 1] = np.float(row[1])
-                    scr_obj.score_front_ts[idx - 1] = np.float(row[2])
-                    #scr_obj.scores[idx - 1][0] = np.float(row[3])
-                    scr_obj.frameCount[idx - 1] = np.int(row[9])
-                    scr_obj.view[idx -1 ] = np.int(row[10])
+            if idx < total_lines_to_read:
+                if not flag_gt:
+                    if idx ==0:
+                        continue
+                    else:
+                        scr_obj.score_ts[idx - 1] = np.float(row[0])
+                        scr_obj.score_side_ts[idx - 1] = np.float(row[1])
+                        scr_obj.score_front_ts[idx - 1] = np.float(row[2])
+                        #scr_obj.scores[idx - 1][0] = np.float(row[3])
+                        scr_obj.frameCount[idx - 1] = np.int(row[9])
+                        scr_obj.view[idx -1 ] = np.int(row[10])
 
 def readArray(filename, arr, index):
 
