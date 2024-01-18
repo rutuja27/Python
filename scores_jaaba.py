@@ -110,9 +110,11 @@ def plot_diff_scores(gndtruth_scores, bias_pred_scores, offline_pred_scores, beh
 
     for i in range(0, numbehs):
         diff = abs(gndtruth_scores[i] - bias_pred_scores[i])
-        sorted_diff = np.sort(diff)
+        sorted_diff = np.sort(diff)[::-1]
+        diff_ind = np.argsort(diff)[::-1][:]
         max_diff = max(diff)
-        print(sorted_diff[::-1])
+        print(sorted_diff[1:10])
+        print([diff_ind[1:10]])
 
 
         if(isofflineScores):
@@ -137,13 +139,11 @@ def plot_diff_scores(gndtruth_scores, bias_pred_scores, offline_pred_scores, beh
             ax[i].set_yticks(np.arange((max_diff) * -1, max_diff, 10.0))
 
 def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_offline_file_path,
-                  pred_score_filename, numFrames, isofflineScores):
+                  pred_score_filename, numFrames, isofflineScores, behavior_names):
 
-    behavior_scores = ["scores_Lift", "scores_Handopen", "scores_Grab", "scores_Supinate", "scores_Chew",
-                       "scores_Atmouth"]
-    numbehs = len(behavior_scores)
+    numbehs = len(behavior_names)
     print(numbehs)
-    print(behavior_scores[1])
+    print(behavior_names)
 
     gnd_scores = np.zeros((numbehs, numFrames), dtype=np.double)
     bias_pred_scores = np.zeros((numbehs ,numFrames) ,dtype=np.double)
@@ -155,29 +155,29 @@ def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_off
     for i in range(0, numbehs):
 
         ## predicted from matlab
-        gndtruth_scores_struct = loadmat(gndtruth_score_file_path + behavior_scores[i] + '.mat')
+        gndtruth_scores_struct = loadmat(gndtruth_score_file_path + behavior_names[i] + '.mat')
         gnd_scores[i][:] = np.array(gndtruth_scores_struct['allScores']['scores'][0][0][0][0][0][:])
 
         ## predicted from bias jaaba
         bias_pred_file = pred_score_file_path + pred_score_filename + '.csv';
         ut.read_score(bias_pred_file, bias_pred_scores[i], numFrames, 0, i+3)
-        ut.read_score(bias_pred_file, bias_pred_scores_view[i], numFrames, 0, 10)
+        ut.read_score(bias_pred_file, bias_pred_scores_view[i], numFrames, 0, 8)
 
         ## predicted scores from offline jaaba
         if(isofflineScores):
-            pred_offline_file = pred_score_offline_file_path + pred_score_filename + '.csv';
+            pred_offline_file = pred_score_offline_file_path + '/scores_offline.csv';
             ut.read_score(pred_offline_file, offline_pred_scores[i], numFrames,0, i+3);
 
-    plotScore(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_scores, isofflineScores)
-    plot_diff_scores(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_scores, isofflineScores)
-    match_scores(gnd_scores, bias_pred_scores, bias_pred_scores_view, behavior_scores, isofflineScores)
+    plotScore(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_names, isofflineScores)
+    plot_diff_scores(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_names, isofflineScores)
+    match_scores(gnd_scores, bias_pred_scores, bias_pred_scores_view, behavior_names, isofflineScores)
 
 def main():
 
     print('Number of arguments', len(sys.argv))
     print('Argument list', str(sys.argv))
 
-    if(len(sys.argv) < 7):
+    if(len(sys.argv) < 8):
         print('Insufficient arguments')
         print('Argument Options:\n' +
               '-path to groundtruth score file\n' +
@@ -185,7 +185,8 @@ def main():
               '-path to predicted score file offline\n'
               '-predicted  score file name\n' +
               '-number of frames for which score is predicted\n'
-              '-is offline scores'
+              '-is offline scores\n'
+              '-behavior names'
               )
 
     else:
@@ -195,8 +196,12 @@ def main():
         pred_score_filename = sys.argv[4]
         numFrames = np.int(sys.argv[5])
         isofflineScores = np.int(sys.argv[6])
+        behavior_names = sys.argv[7]
+
+        behavior_names = [ 'scores_' + x for x in behavior_names.split(',') ]
+        print(behavior_names)
         loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_offline_file_path,
-                    pred_score_filename, numFrames, isofflineScores)
+                    pred_score_filename, numFrames, isofflineScores, behavior_names)
     plt.show()
 
 if __name__ == "__main__":
