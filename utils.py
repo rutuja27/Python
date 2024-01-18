@@ -299,6 +299,17 @@ def adjust_lightness(color, amount):
     c = colorsys.rgb_to_hls(*mc.to_rgb(c))
     return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
 
+def read_classifierparams(filename, cls_model, paramdims):
 
+    with open(filename, 'r', newline='') as f:
+        config_reader = csv.reader(f, delimiter=',')
+        for idx,val in enumerate(config_reader):
+            if(idx < paramdims):
+                cls_model[0][idx] = np.float(val[0])
+                cls_model[1][idx] = np.float(val[1])
+                cls_model[2][idx] = np.float(val[2])
+                cls_model[3][idx] = np.float(val[3])
+                cls_model[4][idx] = np.float(val[4])
 
+    f.close()
 
