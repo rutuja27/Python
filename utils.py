@@ -213,24 +213,16 @@ def maxPeak(latency_arr, latency_filt_arr, height):
     return [len(peaks), peaks]
 
 ## index is the column to read from score file
-## flag_gt - if score file is gt or not - scores file from jaaba is gt
-def read_score(filename,arr_scr, numFrames, flag_gt, index):
-
-    if flag_gt:
-        total_lines_to_read = numFrames
-    else:
-        total_lines_to_read = numFrames + 1
+def read_score(filename,arr_scr, numFrames, index):
 
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
-            if idx < total_lines_to_read:
-                if(not flag_gt):
-                    if(idx ==0):
-                        continue
-                    arr_scr[idx-1] = np.float(row[index])
-                else:
-                    arr_scr[idx] = np.float(row[index])
+            if idx < numFrames:
+               if isinstance(row,str):
+                  continue
+               else:
+                  arr_scr[idx] = np.float(row[index])
     f.close()
 
 def read_score_view(filename, arr_scr_view, arr_scr, arr_scr_side,
