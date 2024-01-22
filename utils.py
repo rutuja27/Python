@@ -219,10 +219,10 @@ def read_score(filename,arr_scr, numFrames, index):
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
             if idx < numFrames:
-               if isinstance(row,str):
-                  continue
+               if not row[0].isnumeric():
+                   continue
                else:
-                  arr_scr[idx] = np.float(row[index])
+                  arr_scr[idx-1] = np.float(row[index])
     f.close()
 
 def read_score_view(filename, arr_scr_view, arr_scr, arr_scr_side,

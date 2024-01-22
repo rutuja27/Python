@@ -145,12 +145,12 @@ def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_off
     print(numbehs)
     print(behavior_names)
 
-    gnd_scores = np.zeros((numbehs, numFrames), dtype=np.double)
-    bias_pred_scores = np.zeros((numbehs ,numFrames) ,dtype=np.double)
+    gnd_scores = np.zeros((numbehs, numFrames), dtype=np.float)
+    bias_pred_scores = np.zeros((numbehs ,numFrames) ,dtype=np.float)
     bias_pred_scores_view = np.zeros((numbehs ,numFrames) ,dtype=np.int)
     bias_scores_ts = np.zeros((numbehs, numFrames), dtype=np.int64)
 
-    offline_pred_scores = np.zeros((numbehs,numFrames), dtype=np.double)
+    offline_pred_scores = np.zeros((numbehs,numFrames), dtype=np.float)
 
     for i in range(0, numbehs):
 
@@ -160,13 +160,13 @@ def loadScoreData(gndtruth_score_file_path, pred_score_file_path, pred_score_off
 
         ## predicted from bias jaaba
         bias_pred_file = pred_score_file_path + pred_score_filename + '.csv';
-        ut.read_score(bias_pred_file, bias_pred_scores[i], numFrames, 0, i+3)
-        ut.read_score(bias_pred_file, bias_pred_scores_view[i], numFrames, 0, 8)
+        ut.read_score(bias_pred_file, bias_pred_scores[i], numFrames, i+3)
+        ut.read_score(bias_pred_file, bias_pred_scores_view[i], numFrames, 8)
 
         ## predicted scores from offline jaaba
         if(isofflineScores):
             pred_offline_file = pred_score_offline_file_path + '/scores_offline.csv';
-            ut.read_score(pred_offline_file, offline_pred_scores[i], numFrames,0, i+3);
+            ut.read_score(pred_offline_file, offline_pred_scores[i], numFrames, i+3);
 
     plotScore(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_names, isofflineScores)
     plot_diff_scores(gnd_scores, bias_pred_scores, offline_pred_scores, behavior_names, isofflineScores)
