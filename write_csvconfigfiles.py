@@ -70,8 +70,8 @@ def main():
         'logging_prefix': '',
         'framegrab_prefix': 'imagegrab',
         'git_commit': '',
-        'date':'',
-        'count_latencyspikes_nidaq':[],
+        'date':''
+        '''count_latencyspikes_nidaq':[],
         'average_normspikes_nidaq':[],
         'mean_spikes_nidaq': [],
         'std_spikes_nidaq': [],
@@ -83,7 +83,7 @@ def main():
         'mean_spikes_f2f': [],
         'std_spikes_f2f': [],
         'spikes_per_sec_f2f': [],
-        'fracIntwspikes_f2f': [],
+        'fracIntwspikes_f2f': [],'''
 
     }
        

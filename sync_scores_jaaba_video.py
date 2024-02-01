@@ -91,7 +91,7 @@ def plot_raw_latencydata(isImagegrabflag, isJaabaflag, isClassifierFlag,
     ax[0, 0].plot(image_proc_cam0[range], '.', color='red', alpha=0.7)
     ax[0, 0].plot(image_proc_cam1[range], '.', color='blue', alpha=0.4)
     ax[0, 0].set_title('Imagegrab Processing Time', fontsize=fontsize)
-    #ax[0, 0].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
+    ax[0, 0].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
     ax[0,0].set_yticks(np.arange(0,max_yrange_imag_proc+1,1.0))
     ax[0,0].set_xlabel('Frames',fontsize=fontsize)
     ax[0,0].set_ylabel('Latency in ms',fontsize=fontsize)
@@ -100,7 +100,7 @@ def plot_raw_latencydata(isImagegrabflag, isJaabaflag, isClassifierFlag,
     ax[1, 0].plot(image_nidaq_cam0[range],'.', color='green', alpha=0.7)
     ax[1, 0].plot(image_nidaq_cam1[range],'.', color='orange', alpha=0.4)
     ax[1, 0].set_title('Imagegrab Nidaq processing Time', fontsize=fontsize)
-    #ax[1, 0].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
+    ax[1, 0].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
     ax[1, 0].set_yticks(np.arange(0, max_yrange_imag_nidaq+1, 1.0))
     ax[1, 0].set_xlabel('Frames', fontsize=fontsize)
     ax[1, 0].set_ylabel('Latency in ms',fontsize=fontsize)
@@ -109,7 +109,7 @@ def plot_raw_latencydata(isImagegrabflag, isJaabaflag, isClassifierFlag,
     ax[0, 1].plot(jaaba_proc_cam0[range], '.', color='pink', alpha=0.7)
     ax[0, 1].plot(jaaba_proc_cam1[range], '.', color='darkblue', alpha=0.4)
     ax[0, 1].set_title('Jaaba Processing Time', fontsize=fontsize)
-    #ax[0, 1].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
+    ax[0, 1].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
     ax[0, 1].set_yticks(np.arange(0, max_yrange_jaaba_proc+1, 0.5))
     ax[0, 1].set_xlabel('Frames',fontsize=fontsize)
     ax[0, 1].set_ylabel('Latency in ms',fontsize=fontsize)
@@ -119,7 +119,7 @@ def plot_raw_latencydata(isImagegrabflag, isJaabaflag, isClassifierFlag,
     ax[1, 1].plot(jaaba_nidaq_cam1[range],'.', color='brown', alpha=0.4)
     ax[1, 1].set_title('Jaaba Nidaq processing Time', fontsize=fontsize)
     ax[1, 1].legend(['Cam 0', 'Cam 1'], fontsize=fontsize-2)
-    #ax[1, 1].set_yticks(np.arange(0, max_yrange_jaaba_nidaq+1, 0.5))
+    ax[1, 1].set_yticks(np.arange(0, max_yrange_jaaba_nidaq+1, 0.5))
     ax[1, 1].set_xlabel('Frames',fontsize=fontsize)
     ax[1, 1].set_ylabel('Latency in ms',fontsize=fontsize)
 
@@ -200,8 +200,6 @@ def plot_skipped_frames_latencyplot(isClassifier, total_lat,
         fontsize=15
         max_total_lat = max(total_lat)
         min_total_lat = min(total_lat)
-        print(max_total_lat)
-        print(min_total_lat)
 
         plt.plot(total_lat[range],'.',color='black')
         plt.plot(classifier_skips[range],'.',color='red')
@@ -226,15 +224,18 @@ def plot_process_scores_latency(isClassifier, isVideo,
     fig3.tight_layout()
     fontsize = 15
     plt.plot(lat_processScores[range], '.', color='red')
+    plt.ylabel('Time in ms',fontsize=fontsize-2)
+    plt.title('Latency for scores collection - time elapsed after gpu processing to scores collection'
+            ,fontsize=fontsize)
 
 
 def match_skips2latency(higher_latency_ind, ind_skips):
     return np.setxor1d(higher_latency_ind,ind_skips) # non intersecting frames
 
-def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
-                         exp_dir, isVideo, numCameras,
+def read_latency_rawdata(filepath, numFrames, trial_type,
+                         isVideo, numCameras,
                          isImagegrab, isJaaba, isClassifier, latency_threshold,
-                         start_range, end_range):
+                         start_range, end_range, numBehs):
     if isImagegrab:
         imagegrab_file_cam0 = filepath + 'imagegrab_start_timecam0_short_trial' + trial_type + '.csv'
         img_proc_cam0 = filepath + 'imagegrab_process_timecam0_short_trial' + trial_type + '.csv'
@@ -267,10 +268,7 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
             jaaba_nidaq_cam1 = filepath + 'jaaba_plugin_nidaqcam1_short_trial' + trial_type + '.csv'
             jaaba_nidaqThres_cam1 = filepath + 'jaaba_plugin_nidaq_threscam1_short_trial' + trial_type + '.csv'
 
-    if exp_dir:
-        classifier_scr_file = classifier_filepath + 'classifier_score.csv'
-    else:
-        classifier_scr_file = filepath + 'classifier_v' + trial_type.rjust(3,'0') + '.csv'
+        classifier_scr_file = filepath + 'scores_v' + trial_type.rjust(3,'0') + '.csv'
         print(classifier_scr_file)
 
     # allocate data
@@ -317,12 +315,12 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
         ut.readcsvFile_int(imagegrab_file_cam0, imagegrab_start_cam0, numFrames, 1000, 0)
         ut.readcsvFile_int(img_end_time_cam0, image_end_time_cam0, numFrames, 1000, 0)
         ut.readcsvFile_int(img_proc_cam0, imagegrab_process_time_cam0, numFrames, 1000, 0)
-        ut.readcsvFile_nidaq(imagegrab_nidaq_cam0, image_nidaq_camtrig0, image_nidaq_cam0, numFrames, 0.02)
+        ut.readcsvFile_nidaq(imagegrab_nidaq_cam0, image_nidaq_camtrig0, image_nidaq_cam0, numFrames, 0.001)
         ut.readcsvFile_int(image_nidaqThres_cam0, image_nidaqThres0, numFrames, 1, 0)
         #ut.readcsvFile_int(img_skipped_cam0, imagegrab_skipped_cam0, numFrames, 1, 0)
 
     if isJaaba:
-        ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0, numFrames, 0.02)
+        ut.readcsvFile_nidaq(jaaba_nidaq_cam0, jaaba_nidaq_camtrig0, jaaba_nidaqcam0, numFrames, 0.001)
         ut.readcsvFile_int(jaaba_nidaqThres_cam0, jaaba_nidaqThres0, numFrames, 1, 0)
         ut.readcsvFile_int(jaaba_proc_cam0, jaaba_process_time_cam0, numFrames, 1000, 0)
         ut.readcsvFile_int(jaaba_strtfile_cam0, jaaba_start_cam0,numFrames, 1000, 0)
@@ -334,23 +332,29 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
             ut.readcsvFile_int(imagegrab_file_cam1, imagegrab_start_cam1,numFrames,1000, 0)
             ut.readcsvFile_int(img_proc_cam1, imagegrab_process_time_cam1, numFrames, 1000, 0)
             ut.readcsvFile_int(img_end_time_cam1, image_end_time_cam1, numFrames, 1000, 0)
-            ut.readcsvFile_nidaq(imagegrab_nidaq_cam1, image_nidaq_camtrig1, image_nidaq_cam1, numFrames, 0.02)
+            ut.readcsvFile_nidaq(imagegrab_nidaq_cam1, image_nidaq_camtrig1, image_nidaq_cam1, numFrames, 0.001)
             ut.readcsvFile_int(image_nidaqThres_cam1, image_nidaqThres1, numFrames, 1, 0)
             #ut.readcsvFile_int(img_skipped_cam1, imagegrab_skipped_cam1, numFrames, 1, 0)
 
         if isJaaba:
-            ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1, numFrames,0.02)
+            ut.readcsvFile_nidaq(jaaba_nidaq_cam1, jaaba_nidaq_camtrig1, jaaba_nidaqcam1, numFrames, 0.001)
             ut.readcsvFile_int(jaaba_nidaqThres_cam1, jaaba_nidaqThres1, numFrames, 1, 0)
             ut.readcsvFile_int(jaaba_proc_cam1, jaaba_process_time_cam1, numFrames, 1000, 0)
             ut.readcsvFile_int(jaaba_strtfile_cam1, jaaba_start_cam1,numFrames, 1000, 0)
             ut.readcsvFile_int(jaaba_endfile_cam1, jaaba_end_cam1, numFrames, 1000,0)
 
     # read ts from score files
+    numofTscolumns= 3;
+    preceedingCols = 2;
+    view_index =  numofTscolumns + numBehs  + preceedingCols
+                                # first three are  ts columns
+                                #number of behaviors
+                                # last two indexes are for frameCount and view
     if isClassifier:
-        ut.read_score(classifier_scr_file, classifier_side_scr_ts, numFrames, 0, 1)
-        ut.read_score(classifier_scr_file, classifier_front_scr_ts, numFrames, 0, 2)
-        ut.read_score(classifier_scr_file, classifier_scr_ts, numFrames,0, 0)
-        ut.read_score(classifier_scr_file, classifier_scr_view, numFrames, 0, 10)
+        ut.read_score(classifier_scr_file, classifier_side_scr_ts, numFrames, numofTscolumns-2)
+        ut.read_score(classifier_scr_file, classifier_front_scr_ts, numFrames,  numofTscolumns-1)
+        ut.read_score(classifier_scr_file, classifier_scr_ts, numFrames, 0)
+        ut.read_score(classifier_scr_file, classifier_scr_view, numFrames, view_index-1)
 
     if isImagegrab:
         image_nidaq_cam0 = image_nidaq_cam0 - image_nidaq_camtrig0
@@ -376,30 +380,26 @@ def read_latency_rawdata(filepath, cls_filepath, numFrames, trial_type,
             classifier_side_scr_ts = classifier_side_scr_ts / 1000
             classifier_front_scr_ts = classifier_front_scr_ts / 1000
         elif not isVideo and isClassifier:
-            classifier_scr_ts = classifier_scr_ts * 0.02
-            classifier_side_scr_ts = classifier_side_scr_ts * 0.02
-            classifier_front_scr_ts = classifier_front_scr_ts * 0.02
+            classifier_scr_ts = classifier_scr_ts * 0.001
+            classifier_side_scr_ts = classifier_side_scr_ts * 0.001
+            classifier_front_scr_ts = classifier_front_scr_ts * 0.001
 
     if isImagegrab and isClassifier:
         if not isVideo:
             total_lat = ((classifier_scr_ts[:]) - image_nidaq_camtrig0[:])
             total_lat[total_lat < 0] = 0
-            print(total_lat)
-            print(classifier_side_scr_ts)
-            print(classifier_front_scr_ts)
+
         else:
             total_lat = (classifier_scr_ts[:] - imagegrab_min)
             print('Skipped in both views', np.argwhere(total_lat < 0))
             total_lat[total_lat < 0] = 0
-            print(total_lat[2])
-            print(imagegrab_min[2])
-            print(classifier_scr_ts[2])
-            print(classifier_scr_ts[2] - imagegrab_min[2])
+
 
     img_camtrig_diff_max_cam0 = max(image_nidaq_camtrig0[1:]-image_nidaq_camtrig0[0:-1])
     img_camtrig_diff_max_cam1 = max(image_nidaq_camtrig1[1:]-image_nidaq_camtrig1[0:-1])
     print('Image camera trigger difference Cam 0',img_camtrig_diff_max_cam0)
     print('Image camera trigger difference Cam 1', img_camtrig_diff_max_cam1)
+
 
     plot_raw_latencydata(isImagegrab, isJaaba, isClassifier,
                          imagegrab_process_time_cam0, imagegrab_process_time_cam1,
@@ -432,7 +432,7 @@ def main():
     print('Number of arguments', len(sys.argv))
     print('Argument list', str(sys.argv))
 
-    if (len(sys.argv) < 14):
+    if (len(sys.argv) < 13):
         print('Insufficient arguments')
         print('Argument Options:\n' +
               '-filepath to latency data\n' +
@@ -447,27 +447,27 @@ def main():
               '-plot end to end classifier latency flag\n' +
               -'latency_threshold for each frame to process\n' +
               -'start range\n' +
-              -'end_range\n')
+              -'end_range\n'+
+              -'numBehs')
     else:
         filepath = sys.argv[1]
-        cls_filepath = sys.argv[2]
-        numFrames = np.int(sys.argv[3])
-        trial_num = sys.argv[4]
-        isexpDir=np.int(sys.argv[5])
-        isVideo = np.int(sys.argv[6])
-        numCameras = np.int(sys.argv[7])
-        isImagegrab = np.int(sys.argv[8])
-        isJaaba = np.int(sys.argv[9])
-        isClassifier=np.int(sys.argv[10])
-        latency_threshold = np.int(sys.argv[11])
-        start_range = np.int(sys.argv[12])
-        end_range = np.int(sys.argv[13])
+        numFrames = np.int(sys.argv[2])
+        trial_num = sys.argv[3]
+        isVideo = np.int(sys.argv[4])
+        numCameras = np.int(sys.argv[5])
+        isImagegrab = np.int(sys.argv[6])
+        isJaaba = np.int(sys.argv[7])
+        isClassifier=np.int(sys.argv[8])
+        latency_threshold = np.int(sys.argv[9])
+        start_range = np.int(sys.argv[10])
+        end_range = np.int(sys.argv[11])
+        numBehs = np.int(sys.argv[12])
 
-        read_latency_rawdata(filepath,cls_filepath,numFrames,
-                             trial_num, isexpDir, isVideo,
+        read_latency_rawdata(filepath,numFrames,
+                             trial_num, isVideo,
                              numCameras, isImagegrab,
                              isJaaba, isClassifier, latency_threshold,
-                             start_range, end_range)
+                             start_range, end_range, numBehs)
 
 
 
