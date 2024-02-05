@@ -215,14 +215,29 @@ def maxPeak(latency_arr, latency_filt_arr, height):
 ## index is the column to read from score file
 def read_score(filename,arr_scr, numFrames, index):
 
+    frameCount=0;
+
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
-            if idx < numFrames:
+            if frameCount < numFrames:
                if not row[0].isnumeric():
                    continue
                else:
-                  arr_scr[idx-1] = np.float(row[index])
+                   if(frameCount == np.int(row[-2])):
+                       arr_scr[frameCount] = np.float(row[index])
+                       frameCount = frameCount + 1
+
+                   else:
+                       # there is a bug in the scores file writing in biasjaaba,
+                       # it sometimes accidentally skips a frame even if that frame is
+                       # not actually skipped. the below code is to correctly read
+                       # the score for the correct framecount
+                       arr_scr[frameCount+1] = np.float(row[index])
+                       frameCount = frameCount + 2
+                       continue
+
+
     f.close()
 
 def read_score_view(filename, arr_scr_view, arr_scr, arr_scr_side,
@@ -258,6 +273,7 @@ def readScoreData(filename, scr_obj, numFrames, flag_gt, numBehs):
 
     total_cols = 3 + numBehs +  2;#first three columns in the score file are the score timestamps
                                      ## last two columns are the framecount and the view
+    frameCount =0;
 
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
@@ -268,14 +284,17 @@ def readScoreData(filename, scr_obj, numFrames, flag_gt, numBehs):
                         continue
                     else:
                         #first three columns in the score file are the score timestamps
-                        scr_obj.score_ts[idx - 1] = np.float(row[0])
-                        scr_obj.score_side_ts[idx - 1] = np.float(row[1])
-                        scr_obj.score_front_ts[idx - 1] = np.float(row[2])
-                        #scr_obj.scores[idx - 1][0] = np.float(row[3])
+                        if frameCount == np.int(row[total_cols-1]):
+                            scr_obj.score_ts[idx - 1] = np.float(row[0])
+                            scr_obj.score_side_ts[idx - 1] = np.float(row[1])
+                            scr_obj.score_front_ts[idx - 1] = np.float(row[2])
+                            #scr_obj.scores[idx - 1][0] = np.float(row[3])
 
-                        ## last two columns are the framecount and the view
-                        scr_obj.frameCount[idx - 1] = np.int(row[total_cols-1])
-                        scr_obj.view[idx -1 ] = np.int(row[total_cols-1])
+                            ## last two columns are the framecount and the view
+                            scr_obj.frameCount[idx - 1] = np.int(row[total_cols-1])
+                            scr_obj.view[idx -1 ] = np.int(row[total_cols-1])
+                        else:
+                            continue
 
 def readArray(filename, arr, index):
 
