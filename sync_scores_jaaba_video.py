@@ -87,6 +87,9 @@ def plot_raw_latencydata(isImagegrabflag, isJaabaflag, isClassifierFlag,
     fontsize=12
     range = np.arange(start_range,end_range)
 
+    avg_img_proc_time = sum(image_proc_cam0)/30000
+    print('Average process time', avg_img_proc_time)
+
     max_yrange_imag_proc = max(max(image_proc_cam0), max(image_proc_cam1))
     ax[0, 0].plot(image_proc_cam0[range], '.', color='red', alpha=0.7)
     ax[0, 0].plot(image_proc_cam1[range], '.', color='blue', alpha=0.4)
@@ -204,8 +207,8 @@ def plot_skipped_frames_latencyplot(isClassifier, total_lat,
         plt.plot(total_lat[range],'.',color='black')
         plt.plot(classifier_skips[range],'.',color='red')
         plt.plot(classifier_skips_nonmatch[range], '.', color='blue')
-        plt.yticks(np.arange(0,max_total_lat,(max_total_lat-min_total_lat)/10) ,fontsize=fontsize-2)
-        plt.xticks(np.arange(0, end_range-start_range, (end_range-start_range)/10), fontsize=fontsize-2)
+        #plt.yticks(np.arange(0,max_total_lat,(max_total_lat-min_total_lat)/10) ,fontsize=fontsize-2)
+        #plt.xticks(np.arange(0, end_range-start_range, (end_range-start_range)/10), fontsize=fontsize-2)
         plt.xlabel('Frames', fontsize=fontsize)
         plt.ylabel('Latency in ms', fontsize=fontsize)
         plt.legend(['Latency', 'skipped', 'latency and skip non match'])
@@ -236,79 +239,77 @@ def read_latency_rawdata(filepath, numFrames, trial_type,
                          isVideo, numCameras,
                          isImagegrab, isJaaba, isClassifier, latency_threshold,
                          start_range, end_range, numBehs):
-    if isImagegrab:
-        imagegrab_file_cam0 = filepath + 'imagegrab_start_timecam0_short_trial' + trial_type + '.csv'
-        img_proc_cam0 = filepath + 'imagegrab_process_timecam0_short_trial' + trial_type + '.csv'
-        img_end_time_cam0 = filepath + 'imagegrab_end_timecam0_short_trial' + trial_type + '.csv'
-        imagegrab_nidaq_cam0 = filepath + 'imagegrab_nidaqcam0_short_trial' + trial_type + '.csv'
-        image_nidaqThres_cam0 = filepath + 'imagegrab_nidaq_threscam0_short_trial' + trial_type + '.csv'
-        #img_skipped_cam0 = filepath + 'imagegrab_skipped_framescam0_short_trial' + trial_type + '.csv'
 
-    if isJaaba:
-        jaaba_strtfile_cam0 = filepath + 'jaaba_plugin_start_timecam0_short_trial' + trial_type + '.csv'
-        jaaba_endfile_cam0 = filepath + 'jaaba_plugin_end_time_cam0_short_trial' + trial_type + '.csv'
-        jaaba_proc_cam0 = filepath + 'jaaba_plugin_process_timecam0_short_trial' + trial_type + '.csv'
-        jaaba_nidaq_cam0 = filepath + 'jaaba_plugin_nidaqcam0_short_trial' + trial_type + '.csv'
-        jaaba_nidaqThres_cam0 = filepath + 'jaaba_plugin_nidaq_threscam0_short_trial' + trial_type + '.csv'
+    imagegrab_file_cam0 = filepath + 'imagegrab_start_timecam0_short_trial' + trial_type + '.csv'
+    img_proc_cam0 = filepath + 'imagegrab_process_timecam0_short_trial' + trial_type + '.csv'
+    img_end_time_cam0 = filepath + 'imagegrab_end_timecam0_short_trial' + trial_type + '.csv'
+    imagegrab_nidaq_cam0 = filepath + 'imagegrab_nidaqcam0_short_trial' + trial_type + '.csv'
+    image_nidaqThres_cam0 = filepath + 'imagegrab_nidaq_threscam0_short_trial' + trial_type + '.csv'
+    #img_skipped_cam0 = filepath + 'imagegrab_skipped_framescam0_short_trial' + trial_type + '.csv'
+
+
+    jaaba_strtfile_cam0 = filepath + 'jaaba_plugin_start_timecam0_short_trial' + trial_type + '.csv'
+    jaaba_endfile_cam0 = filepath + 'jaaba_plugin_end_time_cam0_short_trial' + trial_type + '.csv'
+    jaaba_proc_cam0 = filepath + 'jaaba_plugin_process_timecam0_short_trial' + trial_type + '.csv'
+    jaaba_nidaq_cam0 = filepath + 'jaaba_plugin_nidaqcam0_short_trial' + trial_type + '.csv'
+    jaaba_nidaqThres_cam0 = filepath + 'jaaba_plugin_nidaq_threscam0_short_trial' + trial_type + '.csv'
 
     if numCameras == 2:
 
-        if isImagegrab:
-            imagegrab_file_cam1 = filepath + 'imagegrab_start_timecam1_short_trial' + trial_type + '.csv'
-            img_proc_cam1 = filepath + 'imagegrab_process_timecam1_short_trial' + trial_type + '.csv'
-            img_end_time_cam1 = filepath + 'imagegrab_end_timecam1_short_trial' + trial_type + '.csv'
-            imagegrab_nidaq_cam1 = filepath + 'imagegrab_nidaqcam1_short_trial' + trial_type + '.csv'
-            image_nidaqThres_cam1 = filepath + 'imagegrab_nidaq_threscam1_short_trial' + trial_type + '.csv'
-            # img_skipped_cam1 = filepath + 'imagegrab_skipped_framescam1_short_trial' + trial_type + '.csv'
 
-        if isJaaba:
-            jaaba_strtfile_cam1 = filepath + 'jaaba_plugin_start_timecam1_short_trial' + trial_type + '.csv'
-            jaaba_endfile_cam1 = filepath + 'jaaba_plugin_end_time_cam1_short_trial' + trial_type + '.csv'
-            jaaba_proc_cam1 = filepath + 'jaaba_plugin_process_timecam1_short_trial' + trial_type + '.csv'
-            jaaba_nidaq_cam1 = filepath + 'jaaba_plugin_nidaqcam1_short_trial' + trial_type + '.csv'
-            jaaba_nidaqThres_cam1 = filepath + 'jaaba_plugin_nidaq_threscam1_short_trial' + trial_type + '.csv'
+        imagegrab_file_cam1 = filepath + 'imagegrab_start_timecam1_short_trial' + trial_type + '.csv'
+        img_proc_cam1 = filepath + 'imagegrab_process_timecam1_short_trial' + trial_type + '.csv'
+        img_end_time_cam1 = filepath + 'imagegrab_end_timecam1_short_trial' + trial_type + '.csv'
+        imagegrab_nidaq_cam1 = filepath + 'imagegrab_nidaqcam1_short_trial' + trial_type + '.csv'
+        image_nidaqThres_cam1 = filepath + 'imagegrab_nidaq_threscam1_short_trial' + trial_type + '.csv'
+        # img_skipped_cam1 = filepath + 'imagegrab_skipped_framescam1_short_trial' + trial_type + '.csv'
+
+        jaaba_strtfile_cam1 = filepath + 'jaaba_plugin_start_timecam1_short_trial' + trial_type + '.csv'
+        jaaba_endfile_cam1 = filepath + 'jaaba_plugin_end_time_cam1_short_trial' + trial_type + '.csv'
+        jaaba_proc_cam1 = filepath + 'jaaba_plugin_process_timecam1_short_trial' + trial_type + '.csv'
+        jaaba_nidaq_cam1 = filepath + 'jaaba_plugin_nidaqcam1_short_trial' + trial_type + '.csv'
+        jaaba_nidaqThres_cam1 = filepath + 'jaaba_plugin_nidaq_threscam1_short_trial' + trial_type + '.csv'
 
         classifier_scr_file = filepath + 'scores_v' + trial_type.rjust(3,'0') + '.csv'
         print(classifier_scr_file)
 
     # allocate data
-    if isImagegrab:
-        imagegrab_process_time_cam0 = np.array(numFrames * [0.0])
-        imagegrab_process_time_cam1 = np.array(numFrames * [0.0])
-        imagegrab_start_cam0 = np.array(numFrames * [0.0])
-        imagegrab_start_cam1 = np.array(numFrames * [0.0])
-        image_end_time_cam0 = np.array(numFrames * [0.0])
-        image_end_time_cam1 = np.array(numFrames * [0.0])
-        image_nidaq_cam0 = np.array(numFrames * [0.0])
-        image_nidaq_cam1 = np.array(numFrames * [0.0])
-        image_nidaq_camtrig0 = np.array(numFrames * [0.0])
-        image_nidaq_camtrig1 = np.array(numFrames * [0.0])
-        image_nidaqThres0 = np.array(numFrames * [0.0])
-        image_nidaqThres1 = np.array(numFrames * [0.0])
-        imagegrab_skipped_cam0 = np.array(numFrames * [0.0])
-        imagegrab_skipped_cam1 = np.array(numFrames * [0.0])
 
-    if isJaaba:
-        jaaba_process_time_cam0 = np.array(numFrames * [0.0])
-        jaaba_process_time_cam1 = np.array(numFrames * [0.0])
-        jaaba_start_cam0 = np.array(numFrames * [0.0])
-        jaaba_start_cam1 = np.array(numFrames * [0.0])
-        jaaba_end_cam0 = np.array(numFrames * [0.0])
-        jaaba_end_cam1 = np.array(numFrames * [0.0])
-        jaaba_nidaq_camtrig0 = np.array(numFrames * [0.0])
-        jaaba_nidaq_camtrig1 = np.array(numFrames * [0.0])
-        jaaba_nidaqThres0 = np.array(numFrames * [0.0])
-        jaaba_nidaqThres1 = np.array(numFrames * [0.0])
-        jaaba_nidaqcam0 = np.array(numFrames * [0.0])
-        jaaba_nidaqcam1 = np.array(numFrames * [0.0])
+    imagegrab_process_time_cam0 = np.array(numFrames * [0.0])
+    imagegrab_process_time_cam1 = np.array(numFrames * [0.0])
+    imagegrab_start_cam0 = np.array(numFrames * [0.0])
+    imagegrab_start_cam1 = np.array(numFrames * [0.0])
+    image_end_time_cam0 = np.array(numFrames * [0.0])
+    image_end_time_cam1 = np.array(numFrames * [0.0])
+    image_nidaq_cam0 = np.array(numFrames * [0.0])
+    image_nidaq_cam1 = np.array(numFrames * [0.0])
+    image_nidaq_camtrig0 = np.array(numFrames * [0.0])
+    image_nidaq_camtrig1 = np.array(numFrames * [0.0])
+    image_nidaqThres0 = np.array(numFrames * [0.0])
+    image_nidaqThres1 = np.array(numFrames * [0.0])
+    imagegrab_skipped_cam0 = np.array(numFrames * [0.0])
+    imagegrab_skipped_cam1 = np.array(numFrames * [0.0])
 
-    if isClassifier:
-        classifier_scr = np.array((numFrames) * [0.0])
-        classifier_scr_gt = np.array((numFrames) * [0.0])
-        classifier_scr_ts = np.array((numFrames ) * [0.0])
-        classifier_scr_view = np.array((numFrames) * [0])
-        classifier_side_scr_ts = np.array((numFrames) * [0.0])
-        classifier_front_scr_ts = np.array((numFrames ) * [0.0])
+
+    jaaba_process_time_cam0 = np.array(numFrames * [0.0])
+    jaaba_process_time_cam1 = np.array(numFrames * [0.0])
+    jaaba_start_cam0 = np.array(numFrames * [0.0])
+    jaaba_start_cam1 = np.array(numFrames * [0.0])
+    jaaba_end_cam0 = np.array(numFrames * [0.0])
+    jaaba_end_cam1 = np.array(numFrames * [0.0])
+    jaaba_nidaq_camtrig0 = np.array(numFrames * [0.0])
+    jaaba_nidaq_camtrig1 = np.array(numFrames * [0.0])
+    jaaba_nidaqThres0 = np.array(numFrames * [0.0])
+    jaaba_nidaqThres1 = np.array(numFrames * [0.0])
+    jaaba_nidaqcam0 = np.array(numFrames * [0.0])
+    jaaba_nidaqcam1 = np.array(numFrames * [0.0])
+
+    classifier_scr = np.array((numFrames) * [0.0])
+    classifier_scr_gt = np.array((numFrames) * [0.0])
+    classifier_scr_ts = np.array((numFrames ) * [0.0])
+    classifier_scr_view = np.array((numFrames) * [0])
+    classifier_side_scr_ts = np.array((numFrames) * [0.0])
+    classifier_front_scr_ts = np.array((numFrames ) * [0.0])
 
     # Read data from csv
     if isImagegrab:

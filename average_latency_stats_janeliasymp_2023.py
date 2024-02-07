@@ -11,13 +11,15 @@ def main():
     print('Number of arguments', len(sys.argv))
     print('Argument list', str(sys.argv))
 
-    if(len(sys.argv) < 5):
+    if(len(sys.argv) < 6):
         print('Insufficient arguments')
         print('Argument Options:\n' +
               '-path to latency data\n' +
               '-number of trials\n' +
               '-number of frames per trial\n'
-              '-conversion factor for latency to ms'
+              '-conversion factor for latency to ms\n'
+              '-number of behaviors\n'
+              '-isnidaq'
               )
 
     else:
@@ -26,12 +28,14 @@ def main():
         numFrames = np.int(sys.argv[3])
         period_ms = np.float(sys.argv[4])
         numBehs = np.int(sys.argv[5])
+        isnidaq = np.int(sys.argv[6])
 
     imagegrab_data_cam0 = ld.LatencyData(np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
+                                    np.array(no_of_trials * [numFrames * [0.0]]),
                                     np.array(no_of_trials * [numFrames * [0.0]]),
                                     np.array(no_of_trials * [numFrames * [0.0]]))
 
@@ -41,6 +45,7 @@ def main():
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]),
+                                    np.array(no_of_trials * [numFrames * [0.0]]),
                                     np.array(no_of_trials * [numFrames * [0.0]]))
 
     jaaba_data_cam0 = ld.LatencyData(np.array(no_of_trials * [numFrames * [0.0]]), \
@@ -48,6 +53,7 @@ def main():
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
+                                    np.array(no_of_trials * [numFrames * [0.0]]),
                                     np.array(no_of_trials * [numFrames * [0.0]]),
                                     np.array(no_of_trials * [numFrames * [0.0]]))
 
@@ -57,7 +63,9 @@ def main():
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]), \
                                     np.array(no_of_trials * [numFrames * [0.0]]),
+                                    np.array(no_of_trials * [numFrames * [0.0]])     ,
                                     np.array(no_of_trials * [numFrames * [0.0]]))
+
 
     classifier_scores = np.array(no_of_trials*[ld.Scores(np.array(numFrames * [0.0]), \
                                     np.array(numFrames * [0.0]), \
@@ -79,37 +87,75 @@ def main():
         trial_type = str(i+1)
         cam_id = '0'
 
-        imagegrab_file = data_dir + 'imagegrab_nidaqcam' + cam_id +'_short_trial' + trial_type + '.csv'
-        jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
+        if isnidaq:
+            imagegrab_file = data_dir + 'imagegrab_nidaqcam' + cam_id +'_short_trial' + trial_type + '.csv'
+            jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
 
-        ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam0.lat_camtrig[i],
-                             imagegrab_data_cam0.lat_nidaq[i], numFrames, period_ms)
-        ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam0.lat_camtrig[i],
-                             jaaba_data_cam0.lat_nidaq[i], numFrames, period_ms)
+            ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam0.lat_camtrig[i],
+                                 imagegrab_data_cam0.lat_nidaq[i], numFrames, period_ms)
+            ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam0.lat_camtrig[i],
+                                 jaaba_data_cam0.lat_nidaq[i], numFrames, period_ms)
+        else:
+            imagegrab_file_start = data_dir + 'imagegrab_start_timecam' + cam_id + '_short_trial' + trial_type + '.csv'
+            imagegrab_file_end = data_dir + 'imagegrab_end_timecam' + cam_id + '_short_trial' + trial_type + '.csv'
+            jaaba_file = data_dir + 'jaaba_plugin_end_time_cam' + cam_id + '_short_trial' + trial_type + '.csv'
+            ut.readcsvFile_int64(imagegrab_file_start, imagegrab_data_cam0.lat_pctime_start[i],
+                                 numFrames, (1/period_ms), 0)
+            ut.readcsvFile_int64(imagegrab_file_end, imagegrab_data_cam0.lat_pctime_end[i],
+                                 numFrames, (1 / period_ms), 0)
+            ut.readcsvFile_int64(jaaba_file, jaaba_data_cam0.lat_pctime_end[i],
+                                 numFrames, (1/period_ms), 0)
 
-        cam_id='1'
-        imagegrab_file = data_dir + 'imagegrab_nidaqcam' + cam_id +'_short_trial' + trial_type + '.csv'
-        jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
+        cam_id = '1'
+        if isnidaq:
+
+            imagegrab_file = data_dir + 'imagegrab_nidaqcam' + cam_id +'_short_trial' + trial_type + '.csv'
+            jaaba_file = data_dir + 'jaaba_plugin_nidaqcam' + cam_id + '_short_trial' + trial_type + '.csv'
+            ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam1.lat_camtrig[i],
+                                 imagegrab_data_cam1.lat_nidaq[i], numFrames, period_ms)
+            ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam1.lat_camtrig[i],
+                                 jaaba_data_cam1.lat_nidaq[i], numFrames, period_ms)
+        else:
+            imagegrab_file_start = data_dir + 'imagegrab_start_timecam' + cam_id + '_short_trial' + trial_type + '.csv'
+            imagegrab_file_end = data_dir + 'imagegrab_end_timecam' + cam_id + '_short_trial' + trial_type + '.csv'
+            jaaba_file = data_dir + 'jaaba_plugin_end_time_cam' + cam_id + '_short_trial' + trial_type + '.csv'
+            ut.readcsvFile_int64(imagegrab_file_start, imagegrab_data_cam1.lat_pctime_start[i],
+                                 numFrames, (1/period_ms), 0)
+
+
+            ut.readcsvFile_int64(imagegrab_file_end, imagegrab_data_cam1.lat_pctime_end[i],
+                                 numFrames, (1 / period_ms), 0)
+            ut.readcsvFile_int64(jaaba_file, jaaba_data_cam1.lat_pctime_end[i],
+                                 numFrames, (1/period_ms), 0)
+
 
         scores_file = data_dir + 'scores_v00' + trial_type + '.csv'
-
-        ut.readcsvFile_nidaq(imagegrab_file, imagegrab_data_cam1.lat_camtrig[i],
-                             imagegrab_data_cam1.lat_nidaq[i], numFrames, period_ms)
-        ut.readcsvFile_nidaq(jaaba_file, jaaba_data_cam1.lat_camtrig[i],
-                             jaaba_data_cam1.lat_nidaq[i], numFrames, period_ms)
-        ut.readScoreData(scores_file, classifier_scores[i], numFrames, 0, numBehs) # last argument if gt or not flag
+        ut.readScoreData(scores_file, classifier_scores[i], numFrames, numBehs)
 
         # calculating latencies
-        jaaba_data_cam0.lat_process_time[i] = jaaba_data_cam0.lat_nidaq[i][:] - imagegrab_data_cam0.lat_nidaq[i][:]
-        jaaba_data_cam1.lat_process_time[i] = jaaba_data_cam1.lat_nidaq[i][:] - imagegrab_data_cam1.lat_nidaq[i][:]
-        imagegrab_data_cam0.lat_process_time[i] = imagegrab_data_cam0.lat_nidaq[i] - \
-                                                    imagegrab_data_cam0.lat_camtrig[i]
-        imagegrab_data_cam1.lat_process_time[i] = imagegrab_data_cam1.lat_nidaq[i] - \
-                                                      imagegrab_data_cam1.lat_camtrig[i]
-        classifier_scores[i].score_ts[:] = ((classifier_scores[i].score_ts[:])*period_ms) - \
+        if isnidaq:
+            jaaba_data_cam0.lat_process_time[i] = jaaba_data_cam0.lat_nidaq[i][:] - imagegrab_data_cam0.lat_nidaq[i][:]
+            jaaba_data_cam1.lat_process_time[i] = jaaba_data_cam1.lat_nidaq[i][:] - imagegrab_data_cam1.lat_nidaq[i][:]
+            imagegrab_data_cam0.lat_process_time[i] = imagegrab_data_cam0.lat_nidaq[i] - \
+                                                        imagegrab_data_cam0.lat_camtrig[i]
+            imagegrab_data_cam1.lat_process_time[i] = imagegrab_data_cam1.lat_nidaq[i] - \
+                                                          imagegrab_data_cam1.lat_camtrig[i]
+        else:
+            jaaba_data_cam0.lat_process_time[i] = jaaba_data_cam0.lat_pctime_end[i][:] - imagegrab_data_cam0.lat_pctime_end[i][:]
+            jaaba_data_cam1.lat_process_time[i] = jaaba_data_cam1.lat_pctime_end[i][:] - imagegrab_data_cam1.lat_pctime_end[i][:]
+            imagegrab_data_cam0.lat_process_time[i] = imagegrab_data_cam0.lat_pctime_end[i][:] - \
+                                                      imagegrab_data_cam0.lat_pctime_start[i][:]
+            imagegrab_data_cam1.lat_process_time[i] = imagegrab_data_cam1.lat_pctime_end[i][:] - \
+                                                      imagegrab_data_cam1.lat_pctime_start[i][:]
+
+        if isnidaq:
+            classifier_scores[i].score_ts[:] = ((classifier_scores[i].score_ts[:])*period_ms) - \
                                              np.maximum(jaaba_data_cam0.lat_nidaq[i][:],
                                              jaaba_data_cam1.lat_nidaq[i][:])
-
+        else:
+            classifier_scores[i].score_ts[:] = ((classifier_scores[i].score_ts[:])*period_ms) - \
+                                                np.maximum(jaaba_data_cam0.lat_pctime_end[i][:],
+                                                           jaaba_data_cam1.lat_pctime_end[i][:])
         #compute sum to calculate averages
         image_grab_cam0_avg += np.sum(imagegrab_data_cam0.lat_process_time[i][:])
         image_grab_cam1_avg += np.sum(imagegrab_data_cam1.lat_process_time[i][:])

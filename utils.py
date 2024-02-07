@@ -264,12 +264,7 @@ def read_score_view(filename, arr_scr_view, arr_scr, arr_scr_side,
                         arr_scr[idx-1] = np.float(row[3])
     f.close()
 
-def readScoreData(filename, scr_obj, numFrames, flag_gt, numBehs):
-
-    if flag_gt:
-        total_lines_to_read = numFrames
-    else:
-        total_lines_to_read = numFrames + 1
+def readScoreData(filename, scr_obj, numFrames, numBehs):
 
     total_cols = 3 + numBehs +  2;#first three columns in the score file are the score timestamps
                                      ## last two columns are the framecount and the view
@@ -278,23 +273,29 @@ def readScoreData(filename, scr_obj, numFrames, flag_gt, numBehs):
     with open(filename, 'r', newline='') as f:
         config_reader = csv.reader(f, delimiter=',')
         for idx,row in enumerate(config_reader):
-            if idx < total_lines_to_read:
-                if not flag_gt:
-                    if idx ==0:
-                        continue
-                    else:
-                        #first three columns in the score file are the score timestamps
-                        if frameCount == np.int(row[total_cols-1]):
-                            scr_obj.score_ts[idx - 1] = np.float(row[0])
-                            scr_obj.score_side_ts[idx - 1] = np.float(row[1])
-                            scr_obj.score_front_ts[idx - 1] = np.float(row[2])
-                            #scr_obj.scores[idx - 1][0] = np.float(row[3])
+            if frameCount < numFrames:
+                if not row[0].isnumeric():
+                    continue
+                else:
+                    #first three columns in the score file are the score timestamps
+                    if frameCount == np.int(row[-2]):
+                        scr_obj.score_ts[frameCount] = np.float(row[0])
+                        scr_obj.score_side_ts[frameCount] = np.float(row[1])
+                        scr_obj.score_front_ts[frameCount] = np.float(row[2])
 
-                            ## last two columns are the framecount and the view
-                            scr_obj.frameCount[idx - 1] = np.int(row[total_cols-1])
-                            scr_obj.view[idx -1 ] = np.int(row[total_cols-1])
-                        else:
-                            continue
+                        ## last two columns are the framecount and the view
+                        scr_obj.frameCount[frameCount] = np.int(row[total_cols-2])
+                        scr_obj.view[frameCount] = np.int(row[total_cols-1])
+                        frameCount = frameCount  + 1
+                    else:
+                        scr_obj.score_ts[frameCount+1] = np.float(row[0])
+                        scr_obj.score_side_ts[frameCount+1] = np.float(row[1])
+                        scr_obj.score_front_ts[frameCount+1] = np.float(row[2])
+
+                        ## last two columns are the framecount and the view
+                        scr_obj.frameCount[frameCount+1] = np.int(row[-2])
+                        scr_obj.view[frameCount+1] = np.int(row[-1])
+                        frameCount = frameCount  + 2
 
 def readArray(filename, arr, index):
 

@@ -10,15 +10,16 @@ class LatencyMetric:
 
 class LatencyData:
 
-    def __init__(self, arr1, arr2, arr3, arr4, arr5, arr6, arr7):
+    def __init__(self, arr1, arr2, arr3, arr4, arr5, arr6, arr7, arr8):
         # initializing instance variable
         self.lat_nidaq = arr1
-        self.lat_f2f = arr2
-        self.lat_queue = arr3
-        self.lat_camtrig = arr4
-        self.lat_nidaq_filt = arr5
-        self.lat_process_time = arr6
-        self.lat_total = arr7
+        self.lat_pctime_start = arr2
+        self.lat_pctime_end = arr3
+        self.lat_queue = arr4
+        self.lat_camtrig = arr5
+        self.lat_nidaq_filt = arr6
+        self.lat_process_time = arr7
+        self.lat_total = arr8
 
 class BiasConfigMode:
 
